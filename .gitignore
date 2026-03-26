@@ -2,7 +2,9 @@
 .idea/
 .vscode/
 .fleet/
+assets/
 .env
+.env_template
 logs/
 mysql/
 *.log
