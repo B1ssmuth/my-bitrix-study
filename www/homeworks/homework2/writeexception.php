@@ -8,7 +8,7 @@ $APPLICATION->SetTitle("Ошибка для exeption");
 </ul>
 <?
 // ошибка для exeption
-
+throw new \Exception("Проверка системного логгера OTUS");
 ?>
 
 <? require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/footer.php"); ?>

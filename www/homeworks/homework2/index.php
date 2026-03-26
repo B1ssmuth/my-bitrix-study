@@ -23,16 +23,16 @@ Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bo
 <h4 class="mb-3">Часть 1 - Logger</h4>
 <ul class="list-group">
     <li class="list-group-item">
-        <a href="/local/logs/log_custom.log">Файл лога из п1 ДЗ</a>
+        <a href="/local/logs/otus_debug.log">Файл лога из п1 ДЗ</a>
     </li>
     <li class="list-group-item">
-        <a href="writelog.php">Добавление в лог из п1 ДЗ</a>
+        <a href="/otus/debug.php">Добавление в лог из п1 ДЗ</a>
     </li>
     <li class="list-group-item">
         <a href="clearlog.php">Очистить лог из п1 ДЗ</a>
     </li>
     <li class="list-group-item">
-        <a href="/bitrix/admin/fileman_file_edit.php?path=%2Flocal%2FApp%2FDebug%2FLog.php&full_src=Y">Файл с классом кастомного логгера</a>
+        <a href="/bitrix/admin/fileman_file_edit.php?path=%2Fotus%2Fdebug.php&full_src=Y">Файл с классом кастомного логгера</a>
     </li>
 </ul>
 
@@ -49,7 +49,7 @@ Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bo
         <a href="clearexception.php">Очистить лог из п2 ДЗ</a>
     </li>
     <li class="list-group-item">
-        <a href="/bitrix/admin/fileman_file_edit.php?path=%2Flocal%2Fphp_interface%2Fsrc%2FOtus%2FDiag%2FFileExceptionHanlderLogCustom.php&full_src=Y">Файл с классом системного исключений</a>
+        <a href="/bitrix/admin/fileman_file_edit.php?path=%2Flocal%2FApp%2FDebug%2FLog.php&full_src=Y">Файл с классом системного исключений</a>
     </li>
 </ul>
 
