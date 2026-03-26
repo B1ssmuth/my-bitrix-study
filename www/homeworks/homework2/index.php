@@ -13,8 +13,41 @@ Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bo
 <h1 class="mb-3"><? $APPLICATION->ShowTitle() ?></h1>
 
 <h4 class="mb-3">Пояснительная записка</h4>
-<div>
-    Тут добавить описание того что и как было реализовано.
+<div class="alert alert-light border shadow-sm p-4">
+    <h3 class="mb-4 text-primary">Отчет о выполнении ДЗ №2</h3>
+
+    <section class="mb-4">
+        <h5 class="fw-bold text-secondary">Часть 1: Логирование через HTTP-запрос</h5>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-transparent">
+                <strong>Скрипт:</strong> Создан файл <code>/otus/debug.php</code>, доступный по прямому HTTP-запросу.
+            </li>
+            <li class="list-group-item bg-transparent">
+                <strong>Механизм:</strong> Реализована фиксация текущей даты и времени при каждом обращении.
+            </li>
+            <li class="list-group-item bg-transparent">
+                <strong>Хранение:</strong> Запись осуществляется через статический метод кастомного класса в лог-файл <code>local/logs/otus_debug.log</code>.
+            </li>
+        </ul>
+    </section>
+
+    <section>
+        <h5 class="fw-bold text-secondary">Часть 2: Кастомный системный логгер</h5>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-transparent">
+                <strong>Архитектура:</strong> Разработан класс <code>\App\Debug\Log</code>, наследующий стандартный <code>FileExceptionHandlerLog</code>.
+            </li>
+            <li class="list-group-item bg-transparent">
+                <strong>Инициализация:</strong> Переопределен метод <code>initialize</code> для динамического получения пути к лог-файлу из системного конфига.
+            </li>
+            <li class="list-group-item bg-transparent">
+                <strong>Форматирование:</strong> Модифицирован метод <code>write</code> — теперь каждая строка системного лога автоматически получает префикс <strong>[OTUS]</strong>.
+            </li>
+            <li class="list-group-item bg-transparent">
+                <strong>Интеграция:</strong> Класс зарегистрирован в файле <code>.settings.php</code> (секция <code>exception_handling</code>), что позволило полностью делегировать обработку исключений Битрикса нашему кастомному решению.
+            </li>
+        </ul>
+    </section>
 </div>
 <br>
 <br>
