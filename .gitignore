@@ -19,6 +19,10 @@ www/*
 # Папка для разработки
 !www/local/
 
+# Для ДЗ 
+!www/homeworks/
+!lesson_*/
+
 # Системные файлы в корне сайта
 !www/.htaccess
 !www/urlrewrite.php

@@ -1,0 +1,7 @@
+{
+    "require": {
+        "symfony/var-dumper": "^7.3",
+        "php-sage/sage": "^1.7",
+        "monolog/monolog": "^3.9"
+    }
+}
