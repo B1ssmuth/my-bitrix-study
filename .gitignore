@@ -1,32 +1,36 @@
-# IDE и системные файлы
+# Игнорируем всё в корне по умолчанию
+/*
+
+# Исключения (РАЗРЕШАЕМ эти папки)
+!local/
+!homeworks/
+!otus/
+!lesson_*/
+!assets/
+
+# Разрешаем конкретные файлы в корне сайта
+!.gitignore
+!index.php
+!.htaccess
+!urlrewrite.php
+!.access.php
+!bitrixsetup.php
+!install.sh
+!README.md
+!Makefile
+!docker-compose.yml
+!.env
+!.env_template
+
+# Игнорируем тяжелые папки Битрикса и мусор (даже если они внутри разрешенных)
+bitrix/
+upload/
+mysql/
+logs/
+php/
+nginx/
+apache/
 .idea/
 .vscode/
 .fleet/
-assets/
-.env
-.env_template
-logs/
-mysql/
 *.log
-
-# Игнорируем ядро и загрузки
-www/bitrix/
-www/upload/
-
-# Игнорируем вообще всё в www, чтобы не тащить стандартные папки (auth, shop, crm и т.д.)
-www/*
-
-# Папка для разработки
-!www/local/
-
-# Для ДЗ 
-!www/homeworks/
-!lesson_*/
-!www/otus/
-
-# Системные файлы в корне сайта
-!www/.htaccess
-!www/urlrewrite.php
-!www/.access.php
-!www/index.php
-!www/bitrixsetup.php
