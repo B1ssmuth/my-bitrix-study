@@ -5,7 +5,6 @@
 !local/
 !homeworks/
 !otus/
-!lesson_*/
 !assets/
 !local/logs/.gitkeep
 
@@ -19,9 +18,6 @@
 !install.sh
 !README.md
 !Makefile
-!docker-compose.yml
-!.env
-!.env_template
 
 # Игнорируем тяжелые папки Битрикса и мусор (даже если они внутри разрешенных)
 bitrix/
