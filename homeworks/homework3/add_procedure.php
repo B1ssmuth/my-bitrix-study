@@ -4,7 +4,7 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['name'])) {
     $el = new CIBlockElement;
     $el->Add([
-        "IBLOCK_ID" => 16, // ID процедур
+        "IBLOCK_ID" => 16,
         "NAME" => $_POST['name'],
         "ACTIVE" => "Y"
     ]);

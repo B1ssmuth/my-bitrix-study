@@ -14,7 +14,7 @@ $doctorData = [
     'SELECTED_PROCS' => []
 ];
 
-// 1. ЗАГРУЗКА ДАННЫХ (если мы редактируем)
+// 1. ЗАГРУЗКА ДАННЫХ
 if ($doctorId > 0) {
     // Получаем базовые поля (Имя и Код)
     $res = CIBlockElement::GetByID($doctorId)->Fetch();
