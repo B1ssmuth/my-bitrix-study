@@ -1,5 +1,4 @@
 <?php
-
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 
 use Bitrix\Main\Loader;
@@ -10,15 +9,8 @@ Loader::includeModule('iblock');
 
 $el = new CIBlockElement;
 $doctorId = (int)$_GET['ID'];
-$error = '';
 
-$doctorData = [
-    'CODE' => '',
-    'SURNAME' => '',
-    'NAME' => '',
-    'LAST_NAME' => '',
-    'SELECTED_PROCS' => []
-];
+$doctorData = ['CODE' => '', 'SURNAME' => '', 'NAME' => '', 'LAST_NAME' => '', 'SELECTED_PROCS' => []];
 
 if ($doctorId > 0) {
     $res = CIBlockElement::GetByID($doctorId)->Fetch();
@@ -40,33 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['save'] == 'Y') {
     $fullName = trim($_POST['surname'] . " " . $_POST['name'] . " " . $_POST['last_name']);
     
     $fields = [
-        "IBLOCK_ID" => DoctorsTable::IBLOCK_ID, // Тут должно быть 19
+        "IBLOCK_ID" => DoctorsTable::IBLOCK_ID,
         "NAME" => $fullName,
         "CODE" => $_POST['code'],
         "PROPERTY_VALUES" => ["SERVICES" => $_POST['services']]
     ];
 
-    if ($doctorId > 0) {
-        $result = $el->Update($doctorId, $fields);
-    } else {
-        $result = $el->Add($fields);
-    }
-
-    if ($result) {
-        LocalRedirect("index.php");
-    } else {
-        $error = $el->LAST_ERROR;
-    }
+    $res = ($doctorId > 0) ? $el->Update($doctorId, $fields) : $el->Add($fields);
+    if ($res) LocalRedirect("index.php");
 }
 
 $allProcedures = ProceduresTable::getList(['select' => ['ID' => 'IBLOCK_ELEMENT_ID', 'NAME' => 'ELEMENT.NAME']])->fetchAll();
 ?>
-
-<?php if ($error): ?>
-    <div style="background: #ff0000; color: #fff; padding: 20px; margin: 20px; border-radius: 5px; font-weight: bold; border: 3px solid #000;">
-        ❌ ОШИБКА БИТРИКСА: <?= $error ?>
-    </div>
-<?php endif; ?>
 
 <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: sans-serif;">
     <form method="POST">
@@ -93,7 +70,7 @@ $allProcedures = ProceduresTable::getList(['select' => ['ID' => 'IBLOCK_ELEMENT_
         </div>
 
         <div style="margin-bottom: 20px;">
-            <label>Доступные услуги (зажми Ctrl для выбора нескольких):</label><br>
+            <label>Доступные услуги:</label><br>
             <select name="services[]" multiple style="width: 100%; height: 150px; padding: 8px;">
                 <?php foreach ($allProcedures as $p): ?>
                     <option value="<?= $p['ID'] ?>" <?= in_array($p['ID'], $doctorData['SELECTED_PROCS']) ? 'selected' : '' ?>>
