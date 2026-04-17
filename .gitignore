@@ -1,25 +1,23 @@
 # Игнорируем всё в корне по умолчанию
 /*
 
-# Исключения (РАЗРЕШАЕМ эти папки)
+# Исключения (РАЗРЕШАЕМ эти папки и их содержимое)
 !local/
 !homeworks/
 !otus/
 !assets/
 !local/logs/.gitkeep
 
-# Разрешаем конкретные файлы в корне сайта
+# Разрешаем конкретные файлы в корне (нужны для работы Битрикса)
 !.gitignore
 !index.php
 !.htaccess
 !urlrewrite.php
 !.access.php
-!bitrixsetup.php
-!install.sh
 !README.md
-!Makefile
 
-# Игнорируем тяжелые папки Битрикса и мусор (даже если они внутри разрешенных)
+# Игнорируем тяжелые папки Битрикса и Docker-окружение
+# (даже если они попали в исключения выше)
 bitrix/
 upload/
 mysql/
@@ -27,7 +25,9 @@ logs/
 php/
 nginx/
 apache/
+percona/
+workspace/
+configs/
 .idea/
 .vscode/
-.fleet/
 *.log
