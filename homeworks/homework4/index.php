@@ -3,7 +3,7 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 use App\Models\VisitLogTable;
 use Bitrix\Main\ORM\Fields\ExpressionField;
 
-$APPLICATION->SetTitle("ДЗ 4: Модели и связи");
+$APPLICATION->SetTitle("ДЗ №4: Модели и связи");
 
 $query = VisitLogTable::getList([
     'select' => [
@@ -14,14 +14,28 @@ $query = VisitLogTable::getList([
         'PRICE_WITH_TAX'
     ],
     'runtime' => [
-        // Считаем цену с налогом 22% прямо в SQL
+        // Считаем цену с налогом 22%
         new ExpressionField('PRICE_WITH_TAX', '%s * 1.22', ['VISIT_PRICE'])
     ],
-    'cache' => ['ttl' => 3600] // Запоминаем результат на час
+    'cache' => ['ttl' => 3600],
+    'order' => ['ID' => 'DESC']
 ]);
 ?>
 
 <div style="padding: 20px; font-family: sans-serif;">
+    
+    <div style="margin-bottom: 20px;">
+        <a href="add_visit.php" style="
+            display: inline-block;
+            background: #2fc300;
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        ">+ Добавить новый визит</a>
+    </div>
+
     <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
         <tr style="background: #f0f0f0;">
             <th>ID</th> <th>Пациент</th> <th>Врач</th> <th>Процедура</th> <th>Цена + Налог</th>

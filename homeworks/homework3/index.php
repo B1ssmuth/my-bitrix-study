@@ -1,7 +1,7 @@
 <?php
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 use App\Models\Lists\DoctorsTable;
-$APPLICATION->SetTitle("Управление врачами");
+$APPLICATION->SetTitle("ДЗ №3: Управление врачами");
 
 $doctors = DoctorsTable::getList([
     'select' => ['ID' => 'IBLOCK_ELEMENT_ID', 'NAME' => 'ELEMENT.NAME']
