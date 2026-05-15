@@ -7,6 +7,10 @@ class VisitGridComponent extends CBitrixComponent
 {
     public function executeComponent()
     {
+        if (!\Bitrix\Main\Loader::includeModule('otus.crmtab')) {
+        return;
+        }
+        
         $this->arResult['GRID_ID'] = 'visit_log_list';
         $this->arResult['COLUMNS'] = [
             ['id' => 'ID', 'name' => 'ID', 'sort' => 'ID', 'default' => true],
