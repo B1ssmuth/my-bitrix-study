@@ -74,7 +74,7 @@ Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bo
             </li>
             <li>
                 <h2 class="item clock"><a href="homework7/">ДЗ #7: Создание кастомных полей и встраивание их в систему</a>
-                    <div class="prog proc"></div>
+                    <div class="icon"></div>
                 </h2>
             </li>
             <li>
