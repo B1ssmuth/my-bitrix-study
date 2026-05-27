@@ -8,7 +8,7 @@ use CIBlockElement;
 
 class Visit extends Controller
 {
-    private const BOOKING_IBLOCK_ID = 18;
+    private const BOOKING_IBLOCK_ID = 20; //в локалке 18, в проде 20
 
     public function configureActions()
     {
