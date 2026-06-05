@@ -17,3 +17,13 @@ if (file_exists(__DIR__ . '/../App/autoload.php'))
     'OnIBlockPropertyBuildList',
     ['\\App\\Properties\\BookingProperty', 'GetUserTypeDescription']
 );
+
+\Bitrix\Main\EventManager::getInstance()->addEventHandler(
+    'main',
+    'OnEpilog',
+    function () {
+        if (!defined('ADMIN_SECTION') && ADMIN_SECTION !== true && $GLOBALS['USER']->IsAuthorized()) {
+            \Bitrix\Main\Page\Asset::getInstance()->addJs('/local/js/timeman_modifier.js');
+        }
+    }
+);
