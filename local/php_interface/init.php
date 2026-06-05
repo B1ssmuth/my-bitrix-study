@@ -1,17 +1,14 @@
 <?
-// composer
 if (file_exists(__DIR__ . '/../../vendor/autoload.php'))
 {
     require_once(__DIR__ . '/../../vendor/autoload.php');
 }
 
-// App
 if (file_exists(__DIR__ . '/../App/autoload.php'))
 {
     require_once(__DIR__ . '/../App/autoload.php');
 }
 
-// Регистрация кастомного свойства ИБ
 \Bitrix\Main\EventManager::getInstance()->addEventHandler(
     'iblock',
     'OnIBlockPropertyBuildList',
@@ -20,10 +17,20 @@ if (file_exists(__DIR__ . '/../App/autoload.php'))
 
 \Bitrix\Main\EventManager::getInstance()->addEventHandler(
     'main',
-    'OnEpilog',
+    'onPageStart',
     function () {
-        if (!defined('ADMIN_SECTION') && ADMIN_SECTION !== true && $GLOBALS['USER']->IsAuthorized()) {
-            \Bitrix\Main\Page\Asset::getInstance()->addJs('/local/js/timeman_modifier.js');
+        $request = \Bitrix\Main\Application::getInstance()->getContext()->getRequest();
+        if (!$request->isAdminSection()) {
+            
+            $jsPath = '/local/js/timeman_modifier.js';
+            $fullPath = $_SERVER['DOCUMENT_ROOT'] . $jsPath;
+            $version = file_exists($fullPath) ? filemtime($fullPath) : time();
+            
+            \Bitrix\Main\Page\Asset::getInstance()->addString(
+                '<script src="' . $jsPath . '?v=' . $version . '"></script>',
+                false,
+                \Bitrix\Main\Page\AssetLocation::AFTER_CSS
+            );
         }
     }
 );
