@@ -5,9 +5,12 @@ use Bitrix\Main\Page\Asset;
 
 $APPLICATION->SetTitle("Демонстрация ДЗ №7: Бронирование процедур");
 
-// Подключаем Bootstrap локально для страницы и нативные кнопки
+// Подключаем стили и UI
 Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
 \Bitrix\Main\UI\Extension::load("ui.buttons");
+
+// Жестко подключаем модуль ИБ на самом верху страницы
+\Bitrix\Main\Loader::includeModule('iblock');
 
 // Скрипт всплывающего окна
 Asset::getInstance()->addString("
@@ -92,9 +95,7 @@ window.openBookingPopup = function(doctorId, procId, procName) {
 </script>
 ");
 
-\Bitrix\Main\Loader::includeModule('iblock');
-
-// Обработчик сохранения бронирования (ИБ 18)
+// Обработчик AJAX бронирования (ИБ 18)
 if ($_input = file_get_contents('php://input')) {
     $requestData = json_decode($_input, true);
     if ($requestData['action'] === 'create_booking') {
@@ -112,7 +113,6 @@ if ($_input = file_get_contents('php://input')) {
 
         $el = new \CIBlockElement;
         
-        // Передаем ID свойств инфоблока Бронирование (67 - Врач, 68 - Процедура, 69 - Дата)
         $propValues = [
             67 => intval($requestData['doctorId']),       
             68 => intval($requestData['procedureId']), 
@@ -135,8 +135,15 @@ if ($_input = file_get_contents('php://input')) {
     }
 }
 
-// Выбираем всех врачей из ИБ 16
-$res = \CIBlockElement::GetList(["SORT" => "ASC"], ["IBLOCK_ID" => 16, "ACTIVE" => "Y"], false, false, ["ID", "NAME"]);
+// Запрашиваем врачей напрямую из ИБ 16 без учета старого ORM кэша
+$res = \CIBlockElement::GetList(
+    ["SORT" => "ASC"], 
+    ["IBLOCK_ID" => 16, "ACTIVE" => "Y"], 
+    false, 
+    false, 
+    ["ID", "NAME"]
+);
+
 $doctors = [];
 while ($ob = $res->GetNextElement()) {
     $doctors[] = $ob->GetFields();
@@ -151,7 +158,7 @@ while ($ob = $res->GetNextElement()) {
         <div class="card-body bg-light">
             <div class="row g-4">
                 <?php if (empty($doctors)): ?>
-                    <div class="col-12 text-center text-danger py-4">Врачи в инфоблоке №16 не найдены.</div>
+                    <div class="col-12 text-center text-danger py-4">Врачи в инфоблоке №16 не найдены. Проверьте активность элементов.</div>
                 <?php else: ?>
                     <?php foreach ($doctors as $doctor): ?>
                         <div class="col-md-6">
@@ -160,7 +167,7 @@ while ($ob = $res->GetNextElement()) {
                                     <h5 class="card-title text-primary fw-bold" style="font-size: 20px; color: #0d6efd !important;">👨‍⚕️ <?= htmlspecialchars($doctor['NAME']) ?></h5>
                                     <p class="text-muted small">ID Врача: <code><?= $doctor['ID'] ?></code></p>
                                     
-                                    <?= \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); ?>
+                                    <?php \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); ?>
                                 </div>
                             </div>
                         </div>
@@ -171,6 +178,6 @@ while ($ob = $res->GetNextElement()) {
     </div>
 </div>
 
-<div style="margin-bottom: 100px;"></div>
+<div style="margin-bottom: 60px;"></div>
 
 <?php require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/footer.php"); ?>
