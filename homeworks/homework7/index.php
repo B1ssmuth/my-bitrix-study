@@ -93,7 +93,7 @@ window.openBookingPopup = function(doctorId, procId, procName) {
 </script>
 ");
 
-// Обработчик AJAX бронирования (ИБ 18)
+// Обработчик AJAX бронирования
 if ($_input = file_get_contents('php://input')) {
     $requestData = json_decode($_input, true);
     if ($requestData['action'] === 'create_booking') {
@@ -110,6 +110,8 @@ if ($_input = file_get_contents('php://input')) {
         }
 
         $el = new \CIBlockElement;
+        
+        // Твои свойства в ИБ 20: 67 - Врач, 68 - Процедура, 69 - Дата
         $propValues = [
             67 => intval($requestData['doctorId']),       
             68 => intval($requestData['procedureId']), 
@@ -117,7 +119,7 @@ if ($_input = file_get_contents('php://input')) {
         ];
 
         $fields = [
-            "IBLOCK_ID" => 18, 
+            "IBLOCK_ID" => 20, // Твой ИБ Бронирование имеет ID 20!
             "NAME" => $requestData['patientName'], 
             "ACTIVE" => "Y",
             "PROPERTY_VALUES" => $propValues
@@ -132,9 +134,9 @@ if ($_input = file_get_contents('php://input')) {
     }
 }
 
-// ПРЯМОЙ SQL ЗАПРОС К БАЗЕ: достаем врачей в обход API Битрикса
+// ПРЯМОЙ SQL ЗАПРОС К БАЗЕ: достаем врачей из твоего ИБ 19
 $connection = \Bitrix\Main\Application::getConnection();
-$sql = "SELECT ID, NAME FROM b_iblock_element WHERE IBLOCK_ID = 16 AND ACTIVE = 'Y' ORDER BY SORT ASC";
+$sql = "SELECT ID, NAME FROM b_iblock_element WHERE IBLOCK_ID = 19 AND ACTIVE = 'Y' ORDER BY SORT ASC";
 $recordSet = $connection->query($sql);
 
 $doctors = [];
@@ -151,7 +153,7 @@ while ($row = $recordSet->fetch()) {
         <div class="card-body bg-light">
             <div class="row g-4">
                 <?php if (empty($doctors)): ?>
-                    <div class="col-12 text-center text-danger py-4">Врачи в базе данных не найдены. Убедитесь, что в инфоблоке №16 есть активные элементы.</div>
+                    <div class="col-12 text-center text-danger py-4">Врачи в базе данных не найдены (ИБ 19).</div>
                 <?php else: ?>
                     <?php foreach ($doctors as $doctor): ?>
                         <div class="col-md-6">
@@ -161,7 +163,6 @@ while ($row = $recordSet->fetch()) {
                                     <p class="text-muted small">ID Врача: <code><?= $doctor['ID'] ?></code></p>
                                     
                                     <?php 
-                                    // Отрендерит процедуры кнопками
                                     \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); 
                                     ?>
                                 </div>

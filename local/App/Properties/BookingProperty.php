@@ -19,7 +19,7 @@ class BookingProperty
 
     public static function GetPropertyFieldHtml($arProperty, $value, $strHTMLControlName)
     {
-        return '<input type="text" value="Интерфейс активен в публичной части" readonly>';
+        return '<input type="text" value="Интерфейс активен" readonly>';
     }
 
     public static function GetPublicViewHTML($arProperty, $value, $strHTMLControlName)
@@ -29,7 +29,8 @@ class BookingProperty
 
         \Bitrix\Main\Loader::includeModule('iblock');
         
-        $resProcs = \CIBlockElement::GetList(["SORT" => "ASC"], ["IBLOCK_ID" => 17, "ACTIVE" => "Y"], false, false, ["ID", "NAME"]);
+        // Твой ИБ Врачи — это ID 19. Твой ИБ Процедуры — это ID 18.
+        $resProcs = \CIBlockElement::GetList(["SORT" => "ASC"], ["IBLOCK_ID" => 18, "ACTIVE" => "Y"], false, false, ["ID", "NAME"]);
         
         $html = '<div class="procedures-list" style="margin-top: 10px;">';
         $html .= '<p style="margin-bottom: 8px; font-weight: bold; font-size: 14px; color: #555;">Доступные процедуры:</p>';
@@ -47,7 +48,7 @@ class BookingProperty
         }
 
         if (!$hasProcs) {
-            $html .= '<span style="color: #999; font-size: 13px;">В инфоблоке №17 нет процедур.</span>';
+            $html .= '<span style="color: #999; font-size: 13px;">В инфоблоке №18 нет процедур.</span>';
         }
         $html .= '</div>';
 
