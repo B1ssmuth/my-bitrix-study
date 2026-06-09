@@ -29,8 +29,14 @@ class BookingProperty
 
         \Bitrix\Main\Loader::includeModule('iblock');
         
-        // Достаем все активные процедуры из твоего ИБ 18
-        $resProcs = \CIBlockElement::GetList(["SORT" => "ASC"], ["IBLOCK_ID" => 18, "ACTIVE" => "Y"], false, false, ["ID", "NAME"]);
+        // Выгребаем все активные процедуры из ИБ 18
+        $resProcs = \CIBlockElement::GetList(
+            ["SORT" => "ASC"], 
+            ["IBLOCK_ID" => 18, "ACTIVE" => "Y"], 
+            false, 
+            false, 
+            ["ID", "NAME"]
+        );
         
         $html = '<div class="procedures-list" style="margin-top: 10px;">';
         $html .= '<p style="margin-bottom: 8px; font-weight: bold; font-size: 14px; color: #555;">Доступные процедуры:</p>';
@@ -42,7 +48,7 @@ class BookingProperty
             
             $html .= '<button class="ui-btn ui-btn-sm ui-btn-primary" ';
             $html .= 'onclick="window.openBookingPopup(' . $doctorId . ', ' . $proc['ID'] . ', \'' . $procNameEscaped . '\'); return false;" ';
-            $html .= 'style="margin: 4px; background-color: #2fc6f6; border-color: #2fc6f6; color: #fff; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; padding: 4px 8px; font-size: 12px;">';
+            $html .= 'style="margin: 4px; background-color: #2fc6f6; border-color: #2fc6f6; color: #fff; font-weight: bold; border-radius: 4px; cursor: pointer; border: none; padding: 5px 10px; font-size: 12px;">';
             $html .= '📅 ' . htmlspecialchars($proc['NAME']);
             $html .= '</button>';
         }
@@ -52,6 +58,6 @@ class BookingProperty
         }
         $html .= '</div>';
 
-        return $html; // ОБЯЗАТЕЛЬНО возвращаем строку, чтобы она отрендерилась
+        return $html; 
     }
 }

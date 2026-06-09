@@ -10,7 +10,7 @@ Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bo
 
 \Bitrix\Main\Loader::includeModule('iblock');
 
-// Скрипт всплывающего окна
+// JS-скрипт нативного всплывающего окна Битрикса
 Asset::getInstance()->addString("
 <script>
 window.openBookingPopup = function(doctorId, procId, procName) {
@@ -93,7 +93,7 @@ window.openBookingPopup = function(doctorId, procId, procName) {
 </script>
 ");
 
-// Обработчик AJAX бронирования
+// Обработчик AJAX сохранения записи в ИБ 20 (Бронирование)
 if ($_input = file_get_contents('php://input')) {
     $requestData = json_decode($_input, true);
     if ($requestData['action'] === 'create_booking') {
@@ -111,15 +111,15 @@ if ($_input = file_get_contents('php://input')) {
 
         $el = new \CIBlockElement;
         
-        // Свойства ИБ 20: 67 - Врач, 68 - Процедура, 69 - Дата
+        // Передаем данные через СИМВОЛЬНЫЕ КОДЫ свойств ИБ 20
         $propValues = [
-            67 => intval($requestData['doctorId']),       
-            68 => intval($requestData['procedureId']), 
-            69 => $bitrixDate         
+            "DOCTOR" => intval($requestData['doctorId']),       
+            "PROCEDURE" => intval($requestData['procedureId']), 
+            "DATE" => $bitrixDate         
         ];
 
         $fields = [
-            "IBLOCK_ID" => 20, 
+            "IBLOCK_ID" => 20, // Твой ИБ Бронирование
             "NAME" => $requestData['patientName'], 
             "ACTIVE" => "Y",
             "PROPERTY_VALUES" => $propValues
@@ -134,7 +134,7 @@ if ($_input = file_get_contents('php://input')) {
     }
 }
 
-// ПРЯМОЙ SQL ЗАПРОС К БАЗЕ: достаем врачей из твоего ИБ 19
+// ПРЯМОЙ SQL ЗАПРОС К БАЗЕ: дергаем врачей из ИБ 19 в обход сломанного кэша
 $connection = \Bitrix\Main\Application::getConnection();
 $sql = "SELECT ID, NAME FROM b_iblock_element WHERE IBLOCK_ID = 19 AND ACTIVE = 'Y' ORDER BY SORT ASC";
 $recordSet = $connection->query($sql);
