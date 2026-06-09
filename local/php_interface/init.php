@@ -34,3 +34,9 @@ if (file_exists(__DIR__ . '/../App/autoload.php'))
         }
     }
 );
+
+\Bitrix\Main\EventManager::getInstance()->addEventHandler(
+    'iblock',
+    'OnIBlockPropertyBuildList',
+    ['\\App\\Properties\\BookingProperty', 'GetUserTypeDescription']
+);
