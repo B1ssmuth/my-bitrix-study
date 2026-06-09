@@ -5,12 +5,12 @@ use Bitrix\Main\Page\Asset;
 
 $APPLICATION->SetTitle("Демонстрация ДЗ №7: Бронирование процедур");
 
-// Подключаем стили и UI
 Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
 \Bitrix\Main\UI\Extension::load("ui.buttons");
 
-// Жестко подключаем модуль ИБ на самом верху страницы
+// Принудительно подключаем модуль инфоблоков и сбрасываем рантайм-индексы
 \Bitrix\Main\Loader::includeModule('iblock');
+\CIBlock::ClearIBlockElementCache(16);
 
 // Скрипт всплывающего окна
 Asset::getInstance()->addString("
@@ -112,7 +112,6 @@ if ($_input = file_get_contents('php://input')) {
         }
 
         $el = new \CIBlockElement;
-        
         $propValues = [
             67 => intval($requestData['doctorId']),       
             68 => intval($requestData['procedureId']), 
@@ -135,10 +134,10 @@ if ($_input = file_get_contents('php://input')) {
     }
 }
 
-// Запрашиваем врачей напрямую из ИБ 16 без учета старого ORM кэша
+// Запрашиваем врачей напрямую из ИБ 16 с указанием SITE_ID (чтобы пробить любой глюк кэша)
 $res = \CIBlockElement::GetList(
     ["SORT" => "ASC"], 
-    ["IBLOCK_ID" => 16, "ACTIVE" => "Y"], 
+    ["IBLOCK_ID" => 16, "ACTIVE" => "Y", "CHECK_PERMISSIONS" => "N"], 
     false, 
     false, 
     ["ID", "NAME"]
@@ -148,36 +147,3 @@ $doctors = [];
 while ($ob = $res->GetNextElement()) {
     $doctors[] = $ob->GetFields();
 }
-?>
-
-<div class="container mt-4" style="font-family: sans-serif; position: relative; z-index: 100; background: #fff; padding: 20px; border-radius: 8px;">
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <h4 class="mb-0" style="color: #fff !important;">Демонстрация ДЗ №7: Онлайн-запись к врачам</h4>
-        </div>
-        <div class="card-body bg-light">
-            <div class="row g-4">
-                <?php if (empty($doctors)): ?>
-                    <div class="col-12 text-center text-danger py-4">Врачи в инфоблоке №16 не найдены. Проверьте активность элементов.</div>
-                <?php else: ?>
-                    <?php foreach ($doctors as $doctor): ?>
-                        <div class="col-md-6">
-                            <div class="card h-100 border-secondary" style="background: #fff;">
-                                <div class="card-body">
-                                    <h5 class="card-title text-primary fw-bold" style="font-size: 20px; color: #0d6efd !important;">👨‍⚕️ <?= htmlspecialchars($doctor['NAME']) ?></h5>
-                                    <p class="text-muted small">ID Врача: <code><?= $doctor['ID'] ?></code></p>
-                                    
-                                    <?php \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div style="margin-bottom: 60px;"></div>
-
-<?php require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/footer.php"); ?>
