@@ -5,9 +5,11 @@ use Bitrix\Main\Page\Asset;
 
 $APPLICATION->SetTitle("Демонстрация ДЗ №7: Бронирование процедур");
 
+// Подключаем Bootstrap локально для страницы и нативные кнопки
 Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
 \Bitrix\Main\UI\Extension::load("ui.buttons");
 
+// Скрипт всплывающего окна
 Asset::getInstance()->addString("
 <script>
 window.openBookingPopup = function(doctorId, procId, procName) {
@@ -92,6 +94,7 @@ window.openBookingPopup = function(doctorId, procId, procName) {
 
 \Bitrix\Main\Loader::includeModule('iblock');
 
+// Обработчик сохранения бронирования (ИБ 18)
 if ($_input = file_get_contents('php://input')) {
     $requestData = json_decode($_input, true);
     if ($requestData['action'] === 'create_booking') {
@@ -109,10 +112,11 @@ if ($_input = file_get_contents('php://input')) {
 
         $el = new \CIBlockElement;
         
+        // Передаем ID свойств инфоблока Бронирование (67 - Врач, 68 - Процедура, 69 - Дата)
         $propValues = [
-            "DOCTOR" => $requestData['doctorId'],       
-            "PROCEDURE" => $requestData['procedureId'], 
-            "DATE" => $bitrixDate         
+            67 => intval($requestData['doctorId']),       
+            68 => intval($requestData['procedureId']), 
+            69 => $bitrixDate         
         ];
 
         $fields = [
@@ -131,6 +135,7 @@ if ($_input = file_get_contents('php://input')) {
     }
 }
 
+// Выбираем всех врачей из ИБ 16
 $res = \CIBlockElement::GetList(["SORT" => "ASC"], ["IBLOCK_ID" => 16, "ACTIVE" => "Y"], false, false, ["ID", "NAME"]);
 $doctors = [];
 while ($ob = $res->GetNextElement()) {
@@ -138,28 +143,34 @@ while ($ob = $res->GetNextElement()) {
 }
 ?>
 
-<div class="container mt-5" style="font-family: sans-serif;">
+<div class="container mt-4" style="font-family: sans-serif; position: relative; z-index: 100; background: #fff; padding: 20px; border-radius: 8px;">
     <div class="card shadow-sm">
         <div class="card-header bg-dark text-white">
-            <h4 class="mb-0">Демонстрация ДЗ №7: Онлайн-запись к врачам</h4>
+            <h4 class="mb-0" style="color: #fff !important;">Демонстрация ДЗ №7: Онлайн-запись к врачам</h4>
         </div>
         <div class="card-body bg-light">
             <div class="row g-4">
-                <?php foreach ($doctors as $doctor): ?>
-                    <div class="col-md-6">
-                        <div class="card h-100 border-secondary">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary fw-bold" style="font-size: 20px;">👨‍⚕️ <?= htmlspecialchars($doctor['NAME']) ?></h5>
-                                <p class="text-muted small">ID Врача: <code><?= $doctor['ID'] ?></code></p>
-                                
-                                <?= \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); ?>
+                <?php if (empty($doctors)): ?>
+                    <div class="col-12 text-center text-danger py-4">Врачи в инфоблоке №16 не найдены.</div>
+                <?php else: ?>
+                    <?php foreach ($doctors as $doctor): ?>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-secondary" style="background: #fff;">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary fw-bold" style="font-size: 20px; color: #0d6efd !important;">👨‍⚕️ <?= htmlspecialchars($doctor['NAME']) ?></h5>
+                                    <p class="text-muted small">ID Врача: <code><?= $doctor['ID'] ?></code></p>
+                                    
+                                    <?= \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); ?>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
 </div>
+
+<div style="margin-bottom: 100px;"></div>
 
 <?php require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/footer.php"); ?>
