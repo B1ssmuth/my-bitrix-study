@@ -8,7 +8,6 @@ $APPLICATION->SetTitle("Демонстрация ДЗ №7: Бронирован
 Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
 \Bitrix\Main\UI\Extension::load("ui.buttons");
 
-// Подключаем модуль инфоблоков
 \Bitrix\Main\Loader::includeModule('iblock');
 
 // Скрипт всплывающего окна
@@ -133,18 +132,14 @@ if ($_input = file_get_contents('php://input')) {
     }
 }
 
-// Запрашиваем врачей напрямую из ИБ 16 без проверки прав
-$res = \CIBlockElement::GetList(
-    ["SORT" => "ASC"], 
-    ["IBLOCK_ID" => 16, "ACTIVE" => "Y", "CHECK_PERMISSIONS" => "N"], 
-    false, 
-    false, 
-    ["ID", "NAME"]
-);
+// ПРЯМОЙ SQL ЗАПРОС К БАЗЕ: достаем врачей в обход API Битрикса
+$connection = \Bitrix\Main\Application::getConnection();
+$sql = "SELECT ID, NAME FROM b_iblock_element WHERE IBLOCK_ID = 16 AND ACTIVE = 'Y' ORDER BY SORT ASC";
+$recordSet = $connection->query($sql);
 
 $doctors = [];
-while ($ob = $res->GetNextElement()) {
-    $doctors[] = $ob->GetFields();
+while ($row = $recordSet->fetch()) {
+    $doctors[] = $row;
 }
 ?>
 
@@ -156,7 +151,7 @@ while ($ob = $res->GetNextElement()) {
         <div class="card-body bg-light">
             <div class="row g-4">
                 <?php if (empty($doctors)): ?>
-                    <div class="col-12 text-center text-danger py-4">Врачи в инфоблоке №16 не найдены. Убедитесь, что элементы активны в административной панели.</div>
+                    <div class="col-12 text-center text-danger py-4">Врачи в базе данных не найдены. Убедитесь, что в инфоблоке №16 есть активные элементы.</div>
                 <?php else: ?>
                     <?php foreach ($doctors as $doctor): ?>
                         <div class="col-md-6">
@@ -166,7 +161,7 @@ while ($ob = $res->GetNextElement()) {
                                     <p class="text-muted small">ID Врача: <code><?= $doctor['ID'] ?></code></p>
                                     
                                     <?php 
-                                    // Вызов метода нашего свойства
+                                    // Отрендерит процедуры кнопками
                                     \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); 
                                     ?>
                                 </div>
