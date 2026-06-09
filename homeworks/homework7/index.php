@@ -111,7 +111,7 @@ if ($_input = file_get_contents('php://input')) {
 
         $el = new \CIBlockElement;
         
-        // Твои свойства в ИБ 20: 67 - Врач, 68 - Процедура, 69 - Дата
+        // Свойства ИБ 20: 67 - Врач, 68 - Процедура, 69 - Дата
         $propValues = [
             67 => intval($requestData['doctorId']),       
             68 => intval($requestData['procedureId']), 
@@ -119,7 +119,7 @@ if ($_input = file_get_contents('php://input')) {
         ];
 
         $fields = [
-            "IBLOCK_ID" => 20, // Твой ИБ Бронирование имеет ID 20!
+            "IBLOCK_ID" => 20, 
             "NAME" => $requestData['patientName'], 
             "ACTIVE" => "Y",
             "PROPERTY_VALUES" => $propValues
@@ -162,9 +162,7 @@ while ($row = $recordSet->fetch()) {
                                     <h5 class="card-title text-primary fw-bold" style="font-size: 20px; color: #0d6efd !important;">👨‍⚕️ <?= htmlspecialchars($doctor['NAME']) ?></h5>
                                     <p class="text-muted small">ID Врача: <code><?= $doctor['ID'] ?></code></p>
                                     
-                                    <?php 
-                                    \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); 
-                                    ?>
+                                    <?= \App\Properties\BookingProperty::GetPublicViewHTML(['ELEMENT_ID' => $doctor['ID']], [], []); ?>
                                 </div>
                             </div>
                         </div>
