@@ -13,7 +13,6 @@ class CBPDadataActivity extends CBPActivity
     {
         parent::__construct($name);
         
-        // Регистрируем входящие свойства и возвращаемые результаты
         $this->arProperties = [
             "Title"         => "",
             "inn"           => "", 
@@ -24,8 +23,12 @@ class CBPDadataActivity extends CBPActivity
 
     public function Execute()
     {
-        // Извлекаем значение ИНН
-        $inn = trim($this->ParseValue($this->inn, "string"));
+        // Извлекаем и парсим значение ИНН
+        $inn = $this->inn;
+        if (is_array($inn)) {
+            $inn = current($inn);
+        }
+        $inn = trim($this->ParseValue($inn, "string"));
 
         if (empty($inn)) {
             $this->WriteToTrackingService("ИНН не задан, пропускаем запрос.");
@@ -53,7 +56,6 @@ class CBPDadataActivity extends CBPActivity
                 if (!empty($result["suggestions"][0])) {
                     $party = $result["suggestions"][0];
                     
-                    // Передаем полученные значения наружу в БП
                     $this->COMPANY_NAME = $party["value"] ?? "";
                     $this->LEGAL_ADDRESS = $party["data"]["address"]["value"] ?? "";
 
@@ -71,11 +73,16 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Отрисовка диалога через полностью нативный метод с правильным массивом имени
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
-        if (!array_key_exists("inn", $arCurrentProperties)) {
-            $arCurrentProperties["inn"] = "";
+        // Жестко гарантируем, что значение подставится как чистая строка, убирая слово Array
+        $currentValue = "";
+        if (isset($arCurrentProperties["inn"])) {
+            if (is_array($arCurrentProperties["inn"])) {
+                $currentValue = isset($arCurrentProperties["inn"]["inn"]) ? $arCurrentProperties["inn"]["inn"] : current($arCurrentProperties["inn"]);
+            } else {
+                $currentValue = $arCurrentProperties["inn"];
+            }
         }
 
         ob_start();
@@ -86,14 +93,13 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
-                // Передаем имя поля как массив [$activityName, "inn"]!
-                // Битрикс сам создаст правильный name и свяжет троеточие во фрейме
+                // Передаем плоское имя поля "inn", но Битрикс сам свяжет его с $activityName на бэкенде
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
-                    [$activityName, "inn"], 
-                    $arCurrentProperties["inn"], 
-                    ["size" => 45]
+                    "inn", 
+                    $currentValue, 
+                    ["size" => 50]
                 );
                 ?>
             </td>
@@ -102,19 +108,23 @@ class CBPDadataActivity extends CBPActivity
         return ob_get_clean();
     }
     
-    // Правильный сбор данных с учетом префикса активити
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
         $arErrors = [];
 
-        // Получаем значение из массива, который сгенерировал ShowParameterField
+        // Вытаскиваем значение из POST-запроса, учитывая все варианты битриксовой обертки
         $innValue = "";
-        if (isset($_POST[$activityName . "_inn"])) {
-            $innValue = $_POST[$activityName . "_inn"];
-        } elseif (isset($_POST["inn"])) {
+        if (isset($_POST["inn"])) {
             $innValue = $_POST["inn"];
+        } elseif (isset($_POST[$activityName . "_inn"])) {
+            $innValue = $_POST[$activityName . "_inn"];
         }
 
+        if (is_array($innValue)) {
+            $innValue = current($innValue);
+        }
+
+        // Сохраняем в виде чистого плоского массива значений свойств
         $arCurrentUserProperties = [
             "inn" => $innValue
         ];
