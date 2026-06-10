@@ -76,17 +76,24 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Чистый нативный вывод строки параметров в обход ExecuteResource
-    public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
+    // Чистый нативный вывод строки параметров с корректной сигнатурой Битрикса
+    public static function GetPropertiesDialog($documentType, $activityName, $arWorkflowTemplate, $arWorkflowParameters, $arWorkflowVariables, $arCurrentValues = null, $arAllowComment = true)
     {
-        // Защита от вывода слова 'Array' или дефолтных значений ключа в инпуте
+        // Ищем наше активити в дереве шаблона БП, чтобы достать ранее сохраненные свойства
+        $currentActivity = \CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
+        
         $currentValue = "";
-        if (isset($arCurrentProperties["inn"]) && $arCurrentProperties["inn"] !== "inn") {
-            if (is_array($arCurrentProperties["inn"])) {
-                $currentValue = current($arCurrentProperties["inn"]);
-            } else {
-                $currentValue = $arCurrentProperties["inn"];
-            }
+        if (is_array($currentActivity) && isset($currentActivity["Properties"]["inn"])) {
+            $currentValue = $currentActivity["Properties"]["inn"];
+        }
+
+        // Если форма перегружалась (например, при ошибках валидации), данные берутся из $arCurrentValues
+        if (isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
+            $currentValue = $arCurrentValues["inn"];
+        }
+
+        if (is_array($currentValue)) {
+            $currentValue = current($currentValue);
         }
 
         ob_start();
@@ -97,7 +104,7 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
-                // Битрикс сам генерирует инпут с именем 'inn' и вешает на троеточие рабочий хэндлер фрейма
+                // Битрикс генерирует инпут и вешает на троеточие хэндлер выбора полей/макросов
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
