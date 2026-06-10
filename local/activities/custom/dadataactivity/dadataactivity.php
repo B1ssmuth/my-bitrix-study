@@ -71,7 +71,6 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Правильная отрисовка диалога с явным указанием ID и имени поля
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
         if (!array_key_exists("inn", $arCurrentProperties)) {
@@ -86,13 +85,12 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
-                // Передаем имя поля "inn" третьим параметром, чтобы Битрикс собрал правильный $_POST
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
                     "inn", 
                     $arCurrentProperties["inn"], 
-                    ["size" => 40, "id" => "id_inn_field"]
+                    ["size" => 50]
                 );
                 ?>
             </td>
@@ -101,23 +99,26 @@ class CBPDadataActivity extends CBPActivity
         return ob_get_clean();
     }
     
-    // Метод парсинга и сохранения значений из диалога параметров
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
         $arErrors = [];
+        $runtime = CBPRuntime::GetRuntime();
+        $runtime->StartRuntime();
 
-        // Проверяем, пришел ли ИНН из отправленной формы дизайна БП
-        if (isset($_POST["inn"]) && $_POST["inn"] <> '') {
-            $arCurrentUserProperties = [
-                "inn" => $_POST["inn"]
-            ];
-        } else {
-            // Если поле пустое, Битрикс не должен ломать схему, просто пишем пустую строку
-            $arCurrentUserProperties = [
-                "inn" => ""
-            ];
+        // Битрикс передает данные кастомных полей в массиве, проверяем все варианты прихода данных
+        $innValue = "";
+        if (isset($_POST["inn"])) {
+            $innValue = $_POST["inn"];
+        } elseif (isset($arCurrentUserProperties["inn"])) {
+            $innValue = $arCurrentUserProperties["inn"];
         }
 
+        // Жестко принудительно формируем массив параметров, чтобы Битрикс его принял
+        $arCurrentUserProperties = [
+            "inn" => $innValue
+        ];
+
+        // Возвращаем true, запрещая визуальному конструктору удалять кубик
         return true;
     }
 }
