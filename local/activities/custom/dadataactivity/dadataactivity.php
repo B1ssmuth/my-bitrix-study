@@ -6,20 +6,26 @@ use Bitrix\Main\Web\Json;
 
 class CBPDadataActivity extends CBPActivity
 {
-    private const API_KEY = "ТВОЙ_API_КЛЮЧ_DADATA";
+    // Твой бесплатный токен DaData
+    private const API_KEY = "4f8a3d16279f01e84ab4bde551717284839fd4a4";
 
     public function __construct($name)
     {
         parent::__construct($name);
+        
+        // Все ключи свойств делаем СТРОГО в нижнем регистре
         $this->arProperties = [
-            "Title" => "",
-            "Inn"   => "",
+            "Title"         => "",
+            "inn"           => "", // Было Inn
+            "COMPANY_NAME"  => "", // Должны быть тут, чтобы улетать в "Дополнительные результаты"
+            "LEGAL_ADDRESS" => "",
         ];
     }
 
     public function Execute()
     {
-        $inn = trim($this->ParseValue($this->Inn, "string"));
+        // Извлекаем значение inn в нижнем регистре
+        $inn = trim($this->ParseValue($this->inn, "string"));
 
         if (empty($inn)) {
             $this->WriteToTrackingService("ИНН не задан, пропускаем запрос.");
@@ -47,10 +53,11 @@ class CBPDadataActivity extends CBPActivity
                 if (!empty($result["suggestions"][0])) {
                     $party = $result["suggestions"][0];
                     
-                    $this->arProperties["COMPANY_NAME"] = $party["value"] ?? "";
-                    $this->arProperties["LEGAL_ADDRESS"] = $party["data"]["address"]["value"] ?? "";
+                    // Пишем напрямую в свойства объекта (Битрикс сам прокинет их в RETURN)
+                    $this->COMPANY_NAME = $party["value"] ?? "";
+                    $this->LEGAL_ADDRESS = $party["data"]["address"]["value"] ?? "";
 
-                    $this->WriteToTrackingService("Успешно получены данные по ИНН для: " . $this->arProperties["COMPANY_NAME"]);
+                    $this->WriteToTrackingService("Успешно получены данные по ИНН для: " . $this->COMPANY_NAME);
                 } else {
                     $this->WriteToTrackingService("Компания с ИНН " . $inn . " не найдена в DaData.");
                 }
@@ -66,23 +73,25 @@ class CBPDadataActivity extends CBPActivity
 
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
-        if (!array_key_exists("Inn", $arCurrentProperties)) {
-            $arCurrentProperties["Inn"] = "";
+        // Проверяем ключ inn в нижнем регистре
+        if (!array_key_exists("inn", $arCurrentProperties)) {
+            $arCurrentProperties["inn"] = "";
         }
 
         return '<tr>
             <td align="right" width="40%"><span class="adm-required-field">ИНН для запроса:</span></td>
             <td width="60%">
-                <input type="text" name="inn" id="inn" value="'.htmlspecialcharsbx($arCurrentProperties["Inn"]).'" style="width:70%">
-                <input type="button" value="..." onclick="BPBDShowVariablesDialog(\'inn\', \'/bitrix/admin/bizproc_selector.php\', \'string\');">
+                <input type="text" name="inn" id="id_inn_field" value="'.htmlspecialcharsbx($arCurrentProperties["inn"]).'" style="width:70%">
+                <input type="button" value="..." onclick="BPBDShowVariablesDialog(\'id_inn_field\', \'/bitrix/admin/bizproc_selector.php\', \'string\');">
             </td>
         </tr>';
     }
     
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
+        // Сохраняем строго в ключе inn
         $arCurrentUserProperties = [
-            "Inn" => $_POST["inn"]
+            "inn" => $_POST["inn"]
         ];
 
         return true;
