@@ -13,18 +13,18 @@ class CBPDadataActivity extends CBPActivity
     {
         parent::__construct($name);
         
-        // Все ключи свойств делаем СТРОГО в нижнем регистре
+        // Все ключи свойств делаем строго в нижнем регистре
         $this->arProperties = [
             "Title"         => "",
-            "inn"           => "", // Было Inn
-            "COMPANY_NAME"  => "", // Должны быть тут, чтобы улетать в "Дополнительные результаты"
+            "inn"           => "", 
+            "COMPANY_NAME"  => "", 
             "LEGAL_ADDRESS" => "",
         ];
     }
 
     public function Execute()
     {
-        // Извлекаем значение inn в нижнем регистре
+        // Извлекаем значение inn
         $inn = trim($this->ParseValue($this->inn, "string"));
 
         if (empty($inn)) {
@@ -53,7 +53,7 @@ class CBPDadataActivity extends CBPActivity
                 if (!empty($result["suggestions"][0])) {
                     $party = $result["suggestions"][0];
                     
-                    // Пишем напрямую в свойства объекта (Битрикс сам прокинет их в RETURN)
+                    // Передаем данные наружу в бизнес-процесс
                     $this->COMPANY_NAME = $party["value"] ?? "";
                     $this->LEGAL_ADDRESS = $party["data"]["address"]["value"] ?? "";
 
@@ -73,23 +73,39 @@ class CBPDadataActivity extends CBPActivity
 
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
-        // Проверяем ключ inn в нижнем регистре
         if (!array_key_exists("inn", $arCurrentProperties)) {
             $arCurrentProperties["inn"] = "";
         }
 
+        // Мы используем универсальный вызов диалога выбора полей Битрикса, привязавшись к ID инпута
         return '<tr>
             <td align="right" width="40%"><span class="adm-required-field">ИНН для запроса:</span></td>
             <td width="60%">
                 <input type="text" name="inn" id="id_inn_field" value="'.htmlspecialcharsbx($arCurrentProperties["inn"]).'" style="width:70%">
-                <input type="button" value="..." onclick="BPBDShowVariablesDialog(\'id_inn_field\', \'/bitrix/admin/bizproc_selector.php\', \'string\');">
+                <input type="button" value="..." onclick="void(0);" id="id_inn_button">
             </td>
-        </tr>';
+        </tr>
+        <script>
+        BX.ready(function(){
+            var btn = BX("id_inn_button");
+            if(btn) {
+                btn.onclick = function() {
+                    // Нативный вызов диалога выбора макросов БП для поля id_inn_field
+                    if (typeof BPBDShowVariablesDialog !== "undefined") {
+                        BPBDShowVariablesDialog("id_inn_field", "/bitrix/admin/bizproc_selector.php", "string");
+                    } else if (typeof BPDXShowActivityContent !== "undefined") {
+                        BPDXShowActivityContent("id_inn_field", "string");
+                    } else {
+                        alert("Служба бизнес-процессов не загружена в DOM");
+                    }
+                };
+            }
+        });
+        </script>';
     }
     
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
-        // Сохраняем строго в ключе inn
         $arCurrentUserProperties = [
             "inn" => $_POST["inn"]
         ];
