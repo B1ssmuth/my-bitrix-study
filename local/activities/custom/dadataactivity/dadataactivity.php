@@ -112,25 +112,35 @@ class CBPDadataActivity extends CBPActivity
         return ob_get_clean();
     }
     
-    // Прямой перехват и валидация отправки формы без привлечения сторонних конфигов
-    public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
+    // Прямой перехват и валидация отправки формы с корректной сигнатурой Битрикса
+    public static function GetPropertiesDialogValues($documentType, $activityName, &$arWorkflowTemplate, &$arWorkflowParameters, &$arWorkflowVariables, $arCurrentValues, &$arErrors)
     {
         $arErrors = [];
 
-        // Спокойно вытаскиваем чистую строку макроса из стандартного POST
+        // Значения полей формы Битрикс передает в массив $arCurrentValues
         $innValue = "";
-        if (isset($_POST["inn"]) && $_POST["inn"] !== "") {
-            $innValue = $_POST["inn"];
+        if (isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
+            $innValue = $arCurrentValues["inn"];
         }
 
         if (is_array($innValue)) {
             $innValue = current($innValue);
         }
 
-        // Сохраняем значение в пул параметров активити
-        $arCurrentUserProperties = [
-            "inn" => $innValue
+        // Находим наше активити в шаблоне БП по имени (передается по ссылке &)
+        $currentActivity = &\CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
+
+        // Формируем массив свойств для сохранения. 
+        // Важно также сохранить или переписать Title (название действия), чтобы оно не затерлось.
+        $properties = [
+            "inn" => $innValue,
+            "Title" => $arCurrentValues["title"] ?? ($currentActivity["Properties"]["Title"] ?? "")
         ];
+
+        // Записываем обновленные свойства внутрь структуры шаблона бизнес-процесса
+        if (is_array($currentActivity)) {
+            $currentActivity["Properties"] = $properties;
+        }
 
         return true;
     }
