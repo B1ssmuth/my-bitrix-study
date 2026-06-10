@@ -6,14 +6,14 @@ use Bitrix\Main\Web\Json;
 
 class CBPDadataActivity extends CBPActivity
 {
-    // Твой бесплатный токен DaData
+    // Твой токен DaData
     private const API_KEY = "4f8a3d16279f01e84ab4bde551717284839fd4a4";
 
     public function __construct($name)
     {
         parent::__construct($name);
         
-        // Все ключи свойств делаем строго в нижнем регистре
+        // Регистрируем входящее свойство inn и возвращаемые результаты
         $this->arProperties = [
             "Title"         => "",
             "inn"           => "", 
@@ -24,7 +24,7 @@ class CBPDadataActivity extends CBPActivity
 
     public function Execute()
     {
-        // Извлекаем значение inn
+        // Извлекаем значение ИНН, очищая от пробелов
         $inn = trim($this->ParseValue($this->inn, "string"));
 
         if (empty($inn)) {
@@ -53,13 +53,13 @@ class CBPDadataActivity extends CBPActivity
                 if (!empty($result["suggestions"][0])) {
                     $party = $result["suggestions"][0];
                     
-                    // Передаем данные наружу в бизнес-процесс
+                    // Передаем полученные значения наружу в БП
                     $this->COMPANY_NAME = $party["value"] ?? "";
                     $this->LEGAL_ADDRESS = $party["data"]["address"]["value"] ?? "";
 
-                    $this->WriteToTrackingService("Успешно получены данные по ИНН для: " . $this->COMPANY_NAME);
+                    $this->WriteToTrackingService("DaData: Найдена компания " . $this->COMPANY_NAME);
                 } else {
-                    $this->WriteToTrackingService("Компания с ИНН " . $inn . " не найдена в DaData.");
+                    $this->WriteToTrackingService("DaData: По ИНН " . $inn . " ничего не найдено.");
                 }
             } catch (\Exception $e) {
                 $this->WriteToTrackingService("Ошибка парсинга JSON DaData: " . $e->getMessage());
@@ -71,39 +71,41 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
+    // Системный метод отрисовки полей в окне настроек
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
+        $runtime = CBPRuntime::GetRuntime();
+        $runtime->StartRuntime();
+
         if (!array_key_exists("inn", $arCurrentProperties)) {
             $arCurrentProperties["inn"] = "";
         }
 
-        // Мы используем универсальный вызов диалога выбора полей Битрикса, привязавшись к ID инпута
-        return '<tr>
-            <td align="right" width="40%"><span class="adm-required-field">ИНН для запроса:</span></td>
-            <td width="60%">
-                <input type="text" name="inn" id="id_inn_field" value="'.htmlspecialcharsbx($arCurrentProperties["inn"]).'" style="width:70%">
-                <input type="button" value="..." onclick="void(0);" id="id_inn_button">
+        // Включаем буферизацию вывода, чтобы собрать системную вёрстку
+        ob_start();
+        ?>
+        <tr>
+            <td align="right" width="40%" class="adm-detail-content-cell-l">
+                <span class="adm-required-field">ИНН для запроса:</span>
+            </td>
+            <td width="60%" class="adm-detail-content-cell-r">
+                <?php
+                // Заставляем ядро Битрикса САМОМУ сгенерировать инпут с троеточием
+                echo CBPDocument::ShowParameterField(
+                    $documentType, 
+                    "string", 
+                    "inn", 
+                    $arCurrentProperties["inn"], 
+                    ["size" => 40]
+                );
+                ?>
             </td>
         </tr>
-        <script>
-        BX.ready(function(){
-            var btn = BX("id_inn_button");
-            if(btn) {
-                btn.onclick = function() {
-                    // Нативный вызов диалога выбора макросов БП для поля id_inn_field
-                    if (typeof BPBDShowVariablesDialog !== "undefined") {
-                        BPBDShowVariablesDialog("id_inn_field", "/bitrix/admin/bizproc_selector.php", "string");
-                    } else if (typeof BPDXShowActivityContent !== "undefined") {
-                        BPDXShowActivityContent("id_inn_field", "string");
-                    } else {
-                        alert("Служба бизнес-процессов не загружена в DOM");
-                    }
-                };
-            }
-        });
-        </script>';
+        <?php
+        return ob_get_clean();
     }
     
+    // Системный метод сохранения полей
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
         $arCurrentUserProperties = [
