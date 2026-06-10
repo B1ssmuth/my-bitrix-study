@@ -71,10 +71,17 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
+    // Возвращаем простую и понятную Битриксу вёрстку с кнопкой выбора параметров
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
         if (!array_key_exists("inn", $arCurrentProperties)) {
             $arCurrentProperties["inn"] = "";
+        }
+
+        // Превращаем значение в строку для безопасного вывода
+        $currentValue = $arCurrentProperties["inn"];
+        if (is_array($currentValue)) {
+            $currentValue = implode(", ", $currentValue);
         }
 
         ob_start();
@@ -84,41 +91,36 @@ class CBPDadataActivity extends CBPActivity
                 <span class="adm-required-field">ИНН для запроса:</span>
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
-                <?php
-                echo CBPDocument::ShowParameterField(
-                    $documentType, 
-                    "string", 
-                    "inn", 
-                    $arCurrentProperties["inn"], 
-                    ["size" => 50]
-                );
-                ?>
+                <input type="text" 
+                       name="<?= htmlspecialcharsbx($activityName) ?>_inn" 
+                       id="id_custom_inn_field" 
+                       value="<?= htmlspecialcharsbx($currentValue) ?>" 
+                       style="width:70%">
+                <input type="button" value="..." onclick="BPBDShowVariablesDialog('id_custom_inn_field', '/bitrix/admin/bizproc_selector.php', 'string');">
             </td>
         </tr>
         <?php
         return ob_get_clean();
     }
     
+    // Метод парсинга и сохранения значений из диалога параметров
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
         $arErrors = [];
-        $runtime = CBPRuntime::GetRuntime();
-        $runtime->StartRuntime();
 
-        // Битрикс передает данные кастомных полей в массиве, проверяем все варианты прихода данных
+        // Ищем значение в POST по имени поля с префиксом активити или напрямую
         $innValue = "";
-        if (isset($_POST["inn"])) {
+        if (isset($_POST[$activityName . "_inn"])) {
+            $innValue = $_POST[$activityName . "_inn"];
+        } elseif (isset($_POST["inn"])) {
             $innValue = $_POST["inn"];
-        } elseif (isset($arCurrentUserProperties["inn"])) {
-            $innValue = $arCurrentUserProperties["inn"];
         }
 
-        // Жестко принудительно формируем массив параметров, чтобы Битрикс его принял
+        // Записываем в свойства шаблона
         $arCurrentUserProperties = [
             "inn" => $innValue
         ];
 
-        // Возвращаем true, запрещая визуальному конструктору удалять кубик
         return true;
     }
 }
