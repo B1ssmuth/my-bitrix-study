@@ -29,7 +29,6 @@ class BookingProperty
 
         \Bitrix\Main\Loader::includeModule('iblock');
         
-        // Выгребаем все активные процедуры из ИБ 18
         $resProcs = \CIBlockElement::GetList(
             ["SORT" => "ASC"], 
             ["IBLOCK_ID" => 18, "ACTIVE" => "Y"], 

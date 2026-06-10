@@ -10,7 +10,6 @@ Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bo
 
 \Bitrix\Main\Loader::includeModule('iblock');
 
-// JS-скрипт нативного всплывающего окна Битрикса
 Asset::getInstance()->addString("
 <script>
 window.openBookingPopup = function(doctorId, procId, procName) {
@@ -93,7 +92,6 @@ window.openBookingPopup = function(doctorId, procId, procName) {
 </script>
 ");
 
-// Обработчик AJAX сохранения записи в ИБ 20 (Бронирование)
 if ($_input = file_get_contents('php://input')) {
     $requestData = json_decode($_input, true);
     if ($requestData['action'] === 'create_booking') {
@@ -111,7 +109,6 @@ if ($_input = file_get_contents('php://input')) {
 
         $el = new \CIBlockElement;
         
-        // Передаем данные через СИМВОЛЬНЫЕ КОДЫ свойств ИБ 20
         $propValues = [
             "DOCTOR" => intval($requestData['doctorId']),       
             "PROCEDURE" => intval($requestData['procedureId']), 
@@ -119,7 +116,7 @@ if ($_input = file_get_contents('php://input')) {
         ];
 
         $fields = [
-            "IBLOCK_ID" => 20, // Твой ИБ Бронирование
+            "IBLOCK_ID" => 20,
             "NAME" => $requestData['patientName'], 
             "ACTIVE" => "Y",
             "PROPERTY_VALUES" => $propValues
@@ -134,7 +131,6 @@ if ($_input = file_get_contents('php://input')) {
     }
 }
 
-// ПРЯМОЙ SQL ЗАПРОС К БАЗЕ: дергаем врачей из ИБ 19 в обход сломанного кэша
 $connection = \Bitrix\Main\Application::getConnection();
 $sql = "SELECT ID, NAME FROM b_iblock_element WHERE IBLOCK_ID = 19 AND ACTIVE = 'Y' ORDER BY SORT ASC";
 $recordSet = $connection->query($sql);
