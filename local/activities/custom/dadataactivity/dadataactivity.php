@@ -6,17 +6,17 @@ use Bitrix\Main\Web\Json;
 
 class CBPDadataActivity extends CBPActivity
 {
-    // Твой токен DaData
+    // Твой бесплатный токен DaData
     private const API_KEY = "4f8a3d16279f01e84ab4bde551717284839fd4a4";
 
     public function __construct($name)
     {
         parent::__construct($name);
         
-        // Регистрируем входящие свойства и возвращаемые результаты
+        // Регистрируем входящее свойство инпута и возвращаемые результаты для БП
         $this->arProperties = [
             "Title"         => "",
-            "inn"           => "", // Входящее свойство ИНН
+            "inn"           => "", 
             "COMPANY_NAME"  => "", 
             "LEGAL_ADDRESS" => "",
         ];
@@ -24,7 +24,7 @@ class CBPDadataActivity extends CBPActivity
 
     public function Execute()
     {
-        // Безопасное извлечение значения ИНН, даже если оно пришло как массив
+        // Защита: если значение ИНН прилетело в виде массива макроса, берем первый элемент
         $innValue = $this->inn;
         if (is_array($innValue)) {
             $innValue = current($innValue);
@@ -58,7 +58,7 @@ class CBPDadataActivity extends CBPActivity
                 if (!empty($result["suggestions"][0])) {
                     $party = $result["suggestions"][0];
                     
-                    // Записываем результаты во внешние свойства БП
+                    // Передаем вытащенные данные наружу в переменные БП
                     $this->COMPANY_NAME = $party["value"] ?? "";
                     $this->LEGAL_ADDRESS = $party["data"]["address"]["value"] ?? "";
 
@@ -76,49 +76,61 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Полностью делегируем отрисовку интерфейса ядру Битрикса.
-    // Больше никакой сырой HTML вёрстки — Битрикс сам создаст инпут и свяжет JS-селектор макросов
+    // Чистый нативный вывод строки параметров в обход ExecuteResource
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
-        $runtime = CBPRuntime::GetRuntime();
-        $runtime->StartRuntime();
+        // Защита от вывода слова 'Array' или дефолтных значений ключа в инпуте
+        $currentValue = "";
+        if (isset($arCurrentProperties["inn"]) && $arCurrentProperties["inn"] !== "inn") {
+            if (is_array($arCurrentProperties["inn"])) {
+                $currentValue = current($arCurrentProperties["inn"]);
+            } else {
+                $currentValue = $arCurrentProperties["inn"];
+            }
+        }
 
-        // Формируем карту полей для автоматического рендеринга диалога параметров
-        $arProperties = [
-            "inn" => [
-                "Name" => "ИНН для запроса",
-                "Type" => "string",
-                "Required" => true,
-                "Multiple" => false,
-                "Default" => "",
-            ],
-        ];
-
-        return $runtime->ExecuteResource("activity_custom_properties_dialog.php", [
-            "activityName" => $activityName,
-            "arProperties" => $arProperties,
-            "arCurrentProperties" => $arCurrentProperties,
-        ]);
+        ob_start();
+        ?>
+        <tr>
+            <td align="right" width="40%" class="adm-detail-content-cell-l">
+                <span class="adm-required-field">ИНН для запроса:</span>
+            </td>
+            <td width="60%" class="adm-detail-content-cell-r">
+                <?php
+                // Битрикс сам генерирует инпут с именем 'inn' и вешает на троеточие рабочий хэндлер фрейма
+                echo CBPDocument::ShowParameterField(
+                    $documentType, 
+                    "string", 
+                    "inn", 
+                    $currentValue, 
+                    ["size" => 45]
+                );
+                ?>
+            </td>
+        </tr>
+        <?php
+        return ob_get_clean();
     }
     
-    // Автоматический сбор и валидация данных формы штатными средствами движка CBPActivity
+    // Прямой перехват и валидация отправки формы без привлечения сторонних конфигов
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
         $arErrors = [];
 
-        $arProperties = [
-            "inn" => [
-                "Name" => "ИНН для запроса",
-                "Type" => "string",
-                "Required" => true,
-            ],
-        ];
-
-        // Вызываем штатный метод валидации текущего класса
-        $arErrors = self::ValidatePropertiesDialog($documentType, $activityName, $arProperties, $arCurrentUserProperties);
-        if (count($arErrors) > 0) {
-            return false;
+        // Спокойно вытаскиваем чистую строку макроса из стандартного POST
+        $innValue = "";
+        if (isset($_POST["inn"]) && $_POST["inn"] !== "") {
+            $innValue = $_POST["inn"];
         }
+
+        if (is_array($innValue)) {
+            $innValue = current($innValue);
+        }
+
+        // Сохраняем значение в пул параметров активити
+        $arCurrentUserProperties = [
+            "inn" => $innValue
+        ];
 
         return true;
     }
