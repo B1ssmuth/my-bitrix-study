@@ -66,22 +66,19 @@ class CBPDadataActivity extends CBPActivity
 
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
-        $runtime = CBPRuntime::GetRuntime();
-        $runtime->StartRuntime();
-
         if (!array_key_exists("Inn", $arCurrentProperties)) {
             $arCurrentProperties["Inn"] = "";
         }
 
-        return '<tr id="dadata_inn_field">
-            <td align="right" width="40%" class="adm-detail-content-cell-l"><span class="adm-required-field">ИНН Заказчика:</span></td>
-            <td width="60%" class="adm-detail-content-cell-r">
-                <input type="text" name="inn" id="id_inn" value="'.htmlspecialcharsbx($arCurrentProperties["Inn"]).'" style="width:70%">
-                <input type="button" value="..." onclick="BPBDShowVariablesDialog(\'id_inn\', \'/bitrix/admin/bizproc_selector.php\', \'string\');">
+        return '<tr>
+            <td align="right" width="40%"><span class="adm-required-field">ИНН для запроса:</span></td>
+            <td width="60%">
+                <input type="text" name="inn" id="inn" value="'.htmlspecialcharsbx($arCurrentProperties["Inn"]).'" style="width:70%">
+                <input type="button" value="..." onclick="BPBDShowVariablesDialog(\'inn\', \'/bitrix/admin/bizproc_selector.php\', \'string\');">
             </td>
         </tr>';
     }
-
+    
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
         $arCurrentUserProperties = [
