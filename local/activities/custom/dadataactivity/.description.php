@@ -2,17 +2,17 @@
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
 
 $arActivityDescription = [
-    "NAME" => "Запрос реквизитов из DaData",
+    "NAME" => "Запрос реквизитов из DaData (OTUS)",
     "DESCRIPTION" => "Получает данные компании из DaData по ИНН для ДЗ №9",
     "TYPE" => "activity",
-    "CLASS" => "DataDataActivity",
+    "CLASS" => "DadataActivity", // ТУТ ДОЛЖНО БЫТЬ СТРОГО DadataActivity!
     "JSCLASS" => "BizProcActivity",
     "CATEGORY" => [
-        "ID" => "other",
+        "ID" => "document",
     ],
     "RETURN" => [
         "COMPANY_NAME" => [
-            "NAME" => "Название компании (краткое)",
+            "NAME" => "Название компании",
             "TYPE" => "string",
         ],
         "LEGAL_ADDRESS" => [
