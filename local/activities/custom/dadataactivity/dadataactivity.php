@@ -6,14 +6,14 @@ use Bitrix\Main\Web\Json;
 
 class CBPDadataActivity extends CBPActivity
 {
-    // Твой токен DaData
+    // Твой бесплатный токен DaData
     private const API_KEY = "4f8a3d16279f01e84ab4bde551717284839fd4a4";
 
     public function __construct($name)
     {
         parent::__construct($name);
         
-        // Регистрируем входящее свойство inn и возвращаемые результаты
+        // Регистрируем входящие свойства и возвращаемые результаты
         $this->arProperties = [
             "Title"         => "",
             "inn"           => "", 
@@ -71,17 +71,11 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Возвращаем простую и понятную Битриксу вёрстку с кнопкой выбора параметров
+    // Отрисовка диалога через полностью нативный метод с правильным массивом имени
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
         if (!array_key_exists("inn", $arCurrentProperties)) {
             $arCurrentProperties["inn"] = "";
-        }
-
-        // Превращаем значение в строку для безопасного вывода
-        $currentValue = $arCurrentProperties["inn"];
-        if (is_array($currentValue)) {
-            $currentValue = implode(", ", $currentValue);
         }
 
         ob_start();
@@ -91,24 +85,29 @@ class CBPDadataActivity extends CBPActivity
                 <span class="adm-required-field">ИНН для запроса:</span>
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
-                <input type="text" 
-                       name="<?= htmlspecialcharsbx($activityName) ?>_inn" 
-                       id="id_custom_inn_field" 
-                       value="<?= htmlspecialcharsbx($currentValue) ?>" 
-                       style="width:70%">
-                <input type="button" value="..." onclick="BPBDShowVariablesDialog('id_custom_inn_field', '/bitrix/admin/bizproc_selector.php', 'string');">
+                <?php
+                // Передаем имя поля как массив [$activityName, "inn"]!
+                // Битрикс сам создаст правильный name и свяжет троеточие во фрейме
+                echo CBPDocument::ShowParameterField(
+                    $documentType, 
+                    "string", 
+                    [$activityName, "inn"], 
+                    $arCurrentProperties["inn"], 
+                    ["size" => 45]
+                );
+                ?>
             </td>
         </tr>
         <?php
         return ob_get_clean();
     }
     
-    // Метод парсинга и сохранения значений из диалога параметров
+    // Правильный сбор данных с учетом префикса активити
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
         $arErrors = [];
 
-        // Ищем значение в POST по имени поля с префиксом активити или напрямую
+        // Получаем значение из массива, который сгенерировал ShowParameterField
         $innValue = "";
         if (isset($_POST[$activityName . "_inn"])) {
             $innValue = $_POST[$activityName . "_inn"];
@@ -116,7 +115,6 @@ class CBPDadataActivity extends CBPActivity
             $innValue = $_POST["inn"];
         }
 
-        // Записываем в свойства шаблона
         $arCurrentUserProperties = [
             "inn" => $innValue
         ];
