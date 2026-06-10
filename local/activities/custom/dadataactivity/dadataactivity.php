@@ -24,7 +24,7 @@ class CBPDadataActivity extends CBPActivity
 
     public function Execute()
     {
-        // Извлекаем значение ИНН, очищая от пробелов
+        // Извлекаем значение ИНН
         $inn = trim($this->ParseValue($this->inn, "string"));
 
         if (empty($inn)) {
@@ -71,17 +71,13 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Системный метод отрисовки полей в окне настроек
+    // Правильная отрисовка диалога с явным указанием ID и имени поля
     public static function GetPropertiesDialog($documentType, $activityName, $arAllProperties, $arCurrentProperties, $arAllowComent = true)
     {
-        $runtime = CBPRuntime::GetRuntime();
-        $runtime->StartRuntime();
-
         if (!array_key_exists("inn", $arCurrentProperties)) {
             $arCurrentProperties["inn"] = "";
         }
 
-        // Включаем буферизацию вывода, чтобы собрать системную вёрстку
         ob_start();
         ?>
         <tr>
@@ -90,13 +86,13 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
-                // Заставляем ядро Битрикса САМОМУ сгенерировать инпут с троеточием
+                // Передаем имя поля "inn" третьим параметром, чтобы Битрикс собрал правильный $_POST
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
                     "inn", 
                     $arCurrentProperties["inn"], 
-                    ["size" => 40]
+                    ["size" => 40, "id" => "id_inn_field"]
                 );
                 ?>
             </td>
@@ -105,12 +101,22 @@ class CBPDadataActivity extends CBPActivity
         return ob_get_clean();
     }
     
-    // Системный метод сохранения полей
+    // Метод парсинга и сохранения значений из диалога параметров
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arCurrentUserProperties, &$arErrors)
     {
-        $arCurrentUserProperties = [
-            "inn" => $_POST["inn"]
-        ];
+        $arErrors = [];
+
+        // Проверяем, пришел ли ИНН из отправленной формы дизайна БП
+        if (isset($_POST["inn"]) && $_POST["inn"] <> '') {
+            $arCurrentUserProperties = [
+                "inn" => $_POST["inn"]
+            ];
+        } else {
+            // Если поле пустое, Битрикс не должен ломать схему, просто пишем пустую строку
+            $arCurrentUserProperties = [
+                "inn" => ""
+            ];
+        }
 
         return true;
     }
