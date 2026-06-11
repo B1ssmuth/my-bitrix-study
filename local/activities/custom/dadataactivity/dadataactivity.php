@@ -13,16 +13,16 @@ class CBPDadataActivity extends CBPActivity
         parent::__construct($name);
         
         $this->arProperties = [
-            "Title"           => "",
-            "dadata_inn_code" => "", // Новый уникальный ключ
-            "COMPANY_NAME"    => "", 
-            "LEGAL_ADDRESS"   => "",
+            "Title"         => "",
+            "inn"           => "", // Возвращаем штатный inn
+            "COMPANY_NAME"  => "", 
+            "LEGAL_ADDRESS" => "",
         ];
     }
 
     public function Execute()
     {
-        $innValue = $this->dadata_inn_code;
+        $innValue = $this->inn;
         if (is_array($innValue)) {
             $innValue = current($innValue);
         }
@@ -75,20 +75,13 @@ class CBPDadataActivity extends CBPActivity
         $currentActivity = \CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
         
         $currentValue = "";
-        if (is_array($currentActivity) && isset($currentActivity["Properties"]["dadata_inn_code"])) {
-            $currentValue = $currentActivity["Properties"]["dadata_inn_code"];
+        if (is_array($currentActivity) && isset($currentActivity["Properties"]["inn"])) {
+            $currentValue = $currentActivity["Properties"]["inn"];
         }
 
-        if (is_array($arCurrentValues) && isset($arCurrentValues["dadata_inn_code"]) && $arCurrentValues["dadata_inn_code"] !== "") {
-            $currentValue = $arCurrentValues["dadata_inn_code"];
-        }
-
-        if (is_array($currentValue)) {
-            $currentValue = current($currentValue);
-        }
-
-        if ($currentValue === "dadata_inn_code") {
-            $currentValue = "";
+        // Если форма перегружается, берем из arCurrentValues
+        if (is_array($arCurrentValues) && isset($arCurrentValues["inn"])) {
+            $currentValue = $arCurrentValues["inn"];
         }
 
         ob_start();
@@ -99,10 +92,11 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
+                // Используем стандартный вывод поля. Битрикс сам разберется с типами
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
-                    "dadata_inn_code", 
+                    "inn", 
                     $currentValue, 
                     ["size" => 45]
                 );
@@ -116,27 +110,24 @@ class CBPDadataActivity extends CBPActivity
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arWorkflowTemplate, &$arWorkflowParameters, &$arWorkflowVariables, $arCurrentValues, &$arErrors)
     {
         $arErrors = [];
-        $innValue = "";
 
-        if (is_array($arCurrentValues) && isset($arCurrentValues["dadata_inn_code"]) && $arCurrentValues["dadata_inn_code"] !== "") {
-            $innValue = $arCurrentValues["dadata_inn_code"];
-        } elseif (isset($_POST["dadata_inn_code"]) && $_POST["dadata_inn_code"] !== "") {
-            $innValue = $_POST["dadata_inn_code"];
-        }
+        // Получаем значение поля через стандартный метод Битрикса, который умеет работать с ShowParameterField
+        $arErrors = [];
+        $arProperties = [
+            "inn" => CBPDocument::GetFieldInputValue($documentType, "string", "inn", $arCurrentValues, $arErrors)
+        ];
 
-        if (is_array($innValue)) {
-            $innValue = current($innValue);
+        if (count($arErrors) > 0) {
+            return false;
         }
 
         $currentActivity = &\CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
 
-        $properties = [
-            "dadata_inn_code" => $innValue,
-            "Title" => $arCurrentValues["title"] ?? ($_POST["title"] ?? ($currentActivity["Properties"]["Title"] ?? ""))
-        ];
+        // Сохраняем тайтл и свойства
+        $arProperties["Title"] = $arCurrentValues["title"] ?? ($_POST["title"] ?? ($currentActivity["Properties"]["Title"] ?? ""));
 
         if (is_array($currentActivity)) {
-            $currentActivity["Properties"] = $properties;
+            $currentActivity["Properties"] = $arProperties;
         }
 
         return true;
