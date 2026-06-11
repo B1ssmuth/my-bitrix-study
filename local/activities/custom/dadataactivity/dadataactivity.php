@@ -6,7 +6,7 @@ use Bitrix\Main\Web\Json;
 
 class CBPDadataActivity extends CBPActivity
 {
-    private const API_KEY = "4f8a3d16279f01e84ab4bde551717284839fd4a4";
+    private const API_KEY = "a046d44315563fe9e2f060d0ad8caef77531a5f0";
 
     public function __construct($name)
     {
