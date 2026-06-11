@@ -74,8 +74,10 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
+    // Чистый нативный вывод строки параметров с жестким отсечением дефолтных маркеров
     public static function GetPropertiesDialog($documentType, $activityName, $arWorkflowTemplate, $arWorkflowParameters, $arWorkflowVariables, $arCurrentValues = null, $arAllowComment = true)
     {
+        // 1. Проверяем сохраненные свойства в шаблоне БП
         $currentActivity = \CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
         
         $currentValue = "";
@@ -83,12 +85,18 @@ class CBPDadataActivity extends CBPActivity
             $currentValue = $currentActivity["Properties"]["company_inn"];
         }
 
+        // 2. Если форма перегружалась (например, была ошибка), берем из текущего ввода
         if (is_array($arCurrentValues) && isset($arCurrentValues["company_inn"]) && $arCurrentValues["company_inn"] !== "") {
             $currentValue = $arCurrentValues["company_inn"];
         }
 
         if (is_array($currentValue)) {
             $currentValue = current($currentValue);
+        }
+
+        // КРИТИЧЕСКАЯ ЗАЩИТА: Если значение совпадает с дефолтным маркером, принудительно очищаем поле
+        if (!is_string($currentValue) || trim($currentValue) === "company_inn" || trim($currentValue) === "inn") {
+            $currentValue = "";
         }
 
         ob_start();
@@ -99,7 +107,6 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
-                // Передаем чистое имя company_inn для генерации инпута
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
@@ -114,6 +121,7 @@ class CBPDadataActivity extends CBPActivity
         return ob_get_clean();
     }
     
+    // Прямой перехват и валидация сохранения формы
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arWorkflowTemplate, &$arWorkflowParameters, &$arWorkflowVariables, $arCurrentValues, &$arErrors)
     {
         $arErrors = [];
@@ -127,6 +135,11 @@ class CBPDadataActivity extends CBPActivity
 
         if (is_array($innValue)) {
             $innValue = current($innValue);
+        }
+
+        // Фильтруем дефолтный мусор при сохранении
+        if (!is_string($innValue) || trim($innValue) === "company_inn" || trim($innValue) === "inn") {
+            $innValue = "";
         }
 
         $currentActivity = &\CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
