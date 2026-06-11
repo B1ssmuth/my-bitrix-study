@@ -13,10 +13,10 @@ class CBPDadataActivity extends CBPActivity
     {
         parent::__construct($name);
         
-        // Регистрируем входящее свойство инпута и возвращаемые результаты для БП
+        // Используем уникальный ключ company_inn вместо конфликтного inn
         $this->arProperties = [
             "Title"         => "",
-            "inn"           => "", 
+            "company_inn"   => "", 
             "COMPANY_NAME"  => "", 
             "LEGAL_ADDRESS" => "",
         ];
@@ -24,8 +24,7 @@ class CBPDadataActivity extends CBPActivity
 
     public function Execute()
     {
-        // Защита: если значение ИНН прилетело в виде массива макроса, берем первый элемент
-        $innValue = $this->inn;
+        $innValue = $this->company_inn;
         if (is_array($innValue)) {
             $innValue = current($innValue);
         }
@@ -58,7 +57,6 @@ class CBPDadataActivity extends CBPActivity
                 if (!empty($result["suggestions"][0])) {
                     $party = $result["suggestions"][0];
                     
-                    // Передаем вытащенные данные наружу в переменные БП
                     $this->COMPANY_NAME = $party["value"] ?? "";
                     $this->LEGAL_ADDRESS = $party["data"]["address"]["value"] ?? "";
 
@@ -76,30 +74,21 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Чистый нативный вывод строки параметров с жесткой фильтрацией дефолтных значений
     public static function GetPropertiesDialog($documentType, $activityName, $arWorkflowTemplate, $arWorkflowParameters, $arWorkflowVariables, $arCurrentValues = null, $arAllowComment = true)
     {
-        // 1. Пытаемся получить сохраненное значение из шаблона БП
         $currentActivity = \CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
         
         $currentValue = "";
-        if (is_array($currentActivity) && isset($currentActivity["Properties"]["inn"])) {
-            $currentValue = $currentActivity["Properties"]["inn"];
+        if (is_array($currentActivity) && isset($currentActivity["Properties"]["company_inn"])) {
+            $currentValue = $currentActivity["Properties"]["company_inn"];
         }
 
-        // 2. Если форма перегружалась, приоритет у текущего ввода
-        if (is_array($arCurrentValues) && isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
-            $currentValue = $arCurrentValues["inn"];
+        if (is_array($arCurrentValues) && isset($arCurrentValues["company_inn"]) && $arCurrentValues["company_inn"] !== "") {
+            $currentValue = $arCurrentValues["company_inn"];
         }
 
-        // 3. КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сначала разворачиваем массив, если Битрикс прислал его
         if (is_array($currentValue)) {
             $currentValue = current($currentValue);
-        }
-
-        // Теперь гарантированно очищаем дефолтную строку "inn"
-        if (!is_string($currentValue) || trim($currentValue) === "inn") {
-            $currentValue = "";
         }
 
         ob_start();
@@ -110,10 +99,11 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
+                // Передаем чистое имя company_inn для генерации инпута
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
-                    "inn", 
+                    "company_inn", 
                     $currentValue, 
                     ["size" => 45]
                 );
@@ -124,32 +114,25 @@ class CBPDadataActivity extends CBPActivity
         return ob_get_clean();
     }
     
-    // Прямой перехват и сохранение формы с жесткой очисткой
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arWorkflowTemplate, &$arWorkflowParameters, &$arWorkflowVariables, $arCurrentValues, &$arErrors)
     {
         $arErrors = [];
 
         $innValue = "";
-        if (is_array($arCurrentValues) && isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
-            $innValue = $arCurrentValues["inn"];
-        } elseif (isset($_POST["inn"]) && $_POST["inn"] !== "") {
-            $innValue = $_POST["inn"];
+        if (is_array($arCurrentValues) && isset($arCurrentValues["company_inn"]) && $arCurrentValues["company_inn"] !== "") {
+            $innValue = $arCurrentValues["company_inn"];
+        } elseif (isset($_POST["company_inn"]) && $_POST["company_inn"] !== "") {
+            $innValue = $_POST["company_inn"];
         }
 
-        // Сначала разворачиваем массив
         if (is_array($innValue)) {
             $innValue = current($innValue);
-        }
-
-        // Фильтруем дефолтный мусор
-        if (!is_string($innValue) || trim($innValue) === "inn") {
-            $innValue = "";
         }
 
         $currentActivity = &\CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
 
         $properties = [
-            "inn" => $innValue,
+            "company_inn" => $innValue,
             "Title" => $arCurrentValues["title"] ?? ($_POST["title"] ?? ($currentActivity["Properties"]["Title"] ?? ""))
         ];
 
