@@ -14,7 +14,7 @@ class CBPDadataActivity extends CBPActivity
         
         $this->arProperties = [
             "Title"         => "",
-            "inn"           => "", // Возвращаем штатный inn
+            "inn"           => "", 
             "COMPANY_NAME"  => "", 
             "LEGAL_ADDRESS" => "",
         ];
@@ -70,6 +70,7 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
+    // Полностью ручной и безопасный вывод HTML
     public static function GetPropertiesDialog($documentType, $activityName, $arWorkflowTemplate, $arWorkflowParameters, $arWorkflowVariables, $arCurrentValues = null, $arAllowComment = true)
     {
         $currentActivity = \CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
@@ -79,9 +80,12 @@ class CBPDadataActivity extends CBPActivity
             $currentValue = $currentActivity["Properties"]["inn"];
         }
 
-        // Если форма перегружается, берем из arCurrentValues
         if (is_array($arCurrentValues) && isset($arCurrentValues["inn"])) {
             $currentValue = $arCurrentValues["inn"];
+        }
+
+        if (is_array($currentValue)) {
+            $currentValue = current($currentValue);
         }
 
         ob_start();
@@ -91,43 +95,35 @@ class CBPDadataActivity extends CBPActivity
                 <span class="adm-required-field">ИНН для запроса:</span>
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
-                <?php
-                // Используем стандартный вывод поля. Битрикс сам разберется с типами
-                echo CBPDocument::ShowParameterField(
-                    $documentType, 
-                    "string", 
-                    "inn", 
-                    $currentValue, 
-                    ["size" => 45]
-                );
-                ?>
+                <input type="text" id="id_inn" name="inn" value="<?=htmlspecialchars((string)$currentValue)?>" size="45">
+                <input type="button" value="..." onclick="BPAShowSelector('id_inn', 'string');">
             </td>
         </tr>
         <?php
         return ob_get_clean();
     }
     
+    // Прямой перехват POST-запроса без вызова опасных системных функций
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arWorkflowTemplate, &$arWorkflowParameters, &$arWorkflowVariables, $arCurrentValues, &$arErrors)
     {
         $arErrors = [];
+        $innValue = "";
 
-        // Получаем значение поля через стандартный метод Битрикса, который умеет работать с ShowParameterField
-        $arErrors = [];
-        $arProperties = [
-            "inn" => CBPDocument::GetFieldInputValue($documentType, "string", "inn", $arCurrentValues, $arErrors)
-        ];
+        if (isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
+            $innValue = $arCurrentValues["inn"];
+        } elseif (isset($_POST["inn"]) && $_POST["inn"] !== "") {
+            $innValue = $_POST["inn"];
+        }
 
-        if (count($arErrors) > 0) {
-            return false;
+        if (is_array($innValue)) {
+            $innValue = current($innValue);
         }
 
         $currentActivity = &\CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
 
-        // Сохраняем тайтл и свойства
-        $arProperties["Title"] = $arCurrentValues["title"] ?? ($_POST["title"] ?? ($currentActivity["Properties"]["Title"] ?? ""));
-
         if (is_array($currentActivity)) {
-            $currentActivity["Properties"] = $arProperties;
+            $currentActivity["Properties"]["inn"] = $innValue;
+            $currentActivity["Properties"]["Title"] = $arCurrentValues["title"] ?? ($_POST["title"] ?? ($currentActivity["Properties"]["Title"] ?? ""));
         }
 
         return true;
