@@ -76,10 +76,10 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Чистый нативный вывод строки параметров с защитой от перезаписи
+    // Чистый нативный вывод строки параметров с жесткой фильтрацией дефолтных значений
     public static function GetPropertiesDialog($documentType, $activityName, $arWorkflowTemplate, $arWorkflowParameters, $arWorkflowVariables, $arCurrentValues = null, $arAllowComment = true)
     {
-        // 1. Сначала пытаемся получить ранее сохраненное значение из шаблона БП
+        // 1. Пытаемся получить сохраненное значение из шаблона БП
         $currentActivity = \CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
         
         $currentValue = "";
@@ -87,19 +87,19 @@ class CBPDadataActivity extends CBPActivity
             $currentValue = $currentActivity["Properties"]["inn"];
         }
 
-        // 2. Если форма перегружалась (например, была ошибка валидации), берем из текущего ввода
+        // 2. Если форма перегружалась, приоритет у текущего ввода
         if (is_array($arCurrentValues) && isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
             $currentValue = $arCurrentValues["inn"];
         }
 
-        // 3. КРИТИЧЕСКАЯ ЗАЩИТА: Если значение равно дефолтной строке "inn", очищаем его,
-        // чтобы системный маркер не затирал пустые или кастомные настройки
-        if ($currentValue === "inn") {
-            $currentValue = "";
-        }
-
+        // 3. КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сначала разворачиваем массив, если Битрикс прислал его
         if (is_array($currentValue)) {
             $currentValue = current($currentValue);
+        }
+
+        // Теперь гарантированно очищаем дефолтную строку "inn"
+        if (!is_string($currentValue) || trim($currentValue) === "inn") {
+            $currentValue = "";
         }
 
         ob_start();
@@ -110,7 +110,6 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
-                // Генерируем инпут с привязкой к конструктору БП
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
@@ -125,12 +124,11 @@ class CBPDadataActivity extends CBPActivity
         return ob_get_clean();
     }
     
-    // Прямой перехват и сохранение формы с защитой от дефолтных значений
+    // Прямой перехват и сохранение формы с жесткой очисткой
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arWorkflowTemplate, &$arWorkflowParameters, &$arWorkflowVariables, $arCurrentValues, &$arErrors)
     {
         $arErrors = [];
 
-        // Читаем значение ИНН из параметров Битрикса или напрямую из POST для надежности
         $innValue = "";
         if (is_array($arCurrentValues) && isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
             $innValue = $arCurrentValues["inn"];
@@ -138,19 +136,18 @@ class CBPDadataActivity extends CBPActivity
             $innValue = $_POST["inn"];
         }
 
+        // Сначала разворачиваем массив
         if (is_array($innValue)) {
             $innValue = current($innValue);
         }
 
-        // Если прилетела дефолтная строка "inn", сбрасываем в пустоту, чтобы не сохранять мусор
-        if ($innValue === "inn") {
+        // Фильтруем дефолтный мусор
+        if (!is_string($innValue) || trim($innValue) === "inn") {
             $innValue = "";
         }
 
-        // Находим активити по ссылке в структуре БП
         $currentActivity = &\CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
 
-        // Формируем финальный массив свойств для сохранения
         $properties = [
             "inn" => $innValue,
             "Title" => $arCurrentValues["title"] ?? ($_POST["title"] ?? ($currentActivity["Properties"]["Title"] ?? ""))
