@@ -12,18 +12,17 @@ class CBPDadataActivity extends CBPActivity
     {
         parent::__construct($name);
         
-        // Регистрируем входящее свойство 'inn'
         $this->arProperties = [
-            "Title"         => "",
-            "inn"           => "", 
-            "COMPANY_NAME"  => "", 
-            "LEGAL_ADDRESS" => "",
+            "Title"           => "",
+            "dadata_inn_code" => "", // Новый уникальный ключ
+            "COMPANY_NAME"    => "", 
+            "LEGAL_ADDRESS"   => "",
         ];
     }
 
     public function Execute()
     {
-        $innValue = $this->inn;
+        $innValue = $this->dadata_inn_code;
         if (is_array($innValue)) {
             $innValue = current($innValue);
         }
@@ -55,10 +54,8 @@ class CBPDadataActivity extends CBPActivity
                 $result = Json::decode($response);
                 if (!empty($result["suggestions"][0])) {
                     $party = $result["suggestions"][0];
-                    
                     $this->COMPANY_NAME = $party["value"] ?? "";
                     $this->LEGAL_ADDRESS = $party["data"]["address"]["value"] ?? "";
-
                     $this->WriteToTrackingService("DaData: Найдена компания " . $this->COMPANY_NAME);
                 } else {
                     $this->WriteToTrackingService("DaData: По ИНН " . $inn . " ничего не найдено.");
@@ -73,27 +70,24 @@ class CBPDadataActivity extends CBPActivity
         return CBPActivityExecutionStatus::Closed;
     }
 
-    // Идеальная нативная сигнатура из 7 параметров — JS-редактор теперь отработает корректно
     public static function GetPropertiesDialog($documentType, $activityName, $arWorkflowTemplate, $arWorkflowParameters, $arWorkflowVariables, $arCurrentValues = null, $arAllowComment = true)
     {
         $currentActivity = \CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
         
         $currentValue = "";
-        if (is_array($currentActivity) && isset($currentActivity["Properties"]["inn"])) {
-            $currentValue = $currentActivity["Properties"]["inn"];
+        if (is_array($currentActivity) && isset($currentActivity["Properties"]["dadata_inn_code"])) {
+            $currentValue = $currentActivity["Properties"]["dadata_inn_code"];
         }
 
-        // Если форма перегружалась, приоритет у текущего ввода
-        if (is_array($arCurrentValues) && isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
-            $currentValue = $arCurrentValues["inn"];
+        if (is_array($arCurrentValues) && isset($arCurrentValues["dadata_inn_code"]) && $arCurrentValues["dadata_inn_code"] !== "") {
+            $currentValue = $arCurrentValues["dadata_inn_code"];
         }
 
         if (is_array($currentValue)) {
             $currentValue = current($currentValue);
         }
 
-        // Защита от дефолтного системного текста
-        if ($currentValue === "inn") {
+        if ($currentValue === "dadata_inn_code") {
             $currentValue = "";
         }
 
@@ -105,11 +99,10 @@ class CBPDadataActivity extends CBPActivity
             </td>
             <td width="60%" class="adm-detail-content-cell-r">
                 <?php
-                // Используем ShowParameterField — теперь JS не забагует, так как порядок аргументов метода верный
                 echo CBPDocument::ShowParameterField(
                     $documentType, 
                     "string", 
-                    "inn", 
+                    "dadata_inn_code", 
                     $currentValue, 
                     ["size" => 45]
                 );
@@ -120,30 +113,25 @@ class CBPDadataActivity extends CBPActivity
         return ob_get_clean();
     }
     
-    // Нативная сигнатура сохранения из 7 параметров
     public static function GetPropertiesDialogValues($documentType, $activityName, &$arWorkflowTemplate, &$arWorkflowParameters, &$arWorkflowVariables, $arCurrentValues, &$arErrors)
     {
         $arErrors = [];
-
         $innValue = "";
-        if (is_array($arCurrentValues) && isset($arCurrentValues["inn"]) && $arCurrentValues["inn"] !== "") {
-            $innValue = $arCurrentValues["inn"];
-        } elseif (isset($_POST["inn"]) && $_POST["inn"] !== "") {
-            $innValue = $_POST["inn"];
+
+        if (is_array($arCurrentValues) && isset($arCurrentValues["dadata_inn_code"]) && $arCurrentValues["dadata_inn_code"] !== "") {
+            $innValue = $arCurrentValues["dadata_inn_code"];
+        } elseif (isset($_POST["dadata_inn_code"]) && $_POST["dadata_inn_code"] !== "") {
+            $innValue = $_POST["dadata_inn_code"];
         }
 
         if (is_array($innValue)) {
             $innValue = current($innValue);
         }
 
-        if ($innValue === "inn") {
-            $innValue = "";
-        }
-
         $currentActivity = &\CBPWorkflowTemplateLoader::FindActivityByName($arWorkflowTemplate, $activityName);
 
         $properties = [
-            "inn" => $innValue,
+            "dadata_inn_code" => $innValue,
             "Title" => $arCurrentValues["title"] ?? ($_POST["title"] ?? ($currentActivity["Properties"]["Title"] ?? ""))
         ];
 
