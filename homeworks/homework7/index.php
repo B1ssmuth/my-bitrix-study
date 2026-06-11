@@ -3,7 +3,7 @@ require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/header.php");
 
 use Bitrix\Main\Page\Asset;
 
-$APPLICATION->SetTitle("Демонстрация ДЗ №7: Бронирование процедур");
+$APPLICATION->SetTitle("ДЗ №7: Бронирование процедур");
 
 Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
 \Bitrix\Main\UI\Extension::load("ui.buttons");

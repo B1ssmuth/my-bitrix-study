@@ -1,6 +1,6 @@
 <?
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
-$APPLICATION->SetTitle("ДЗ №8 — Модификация интерфейса");
+$APPLICATION->SetTitle("ДЗ №8: Модификация интерфейса");
 
 $jsPath = '/local/js/timeman_modifier.js';
 $jsFileExists = file_exists($_SERVER['DOCUMENT_ROOT'] . $jsPath);
