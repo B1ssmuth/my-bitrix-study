@@ -17,6 +17,8 @@ class BookingProperty
             "GetPublicViewHTML" => [__CLASS__, "GetPublicViewHTML"],
             "GetAdminListViewHTML" => [__CLASS__, "GetAdminListViewHTML"],
             "GetPropertyFieldHtml" => [__CLASS__, "GetPropertyFieldHtml"],
+            // ВАЖНО: Эта строка делает свойство видимым в публичных Списках!
+            "GetPublicEditHTML" => [__CLASS__, "GetPropertyFieldHtml"],
         ];
     }
 
