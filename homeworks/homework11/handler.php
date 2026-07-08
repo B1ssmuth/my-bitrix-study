@@ -5,23 +5,26 @@
  */
 
 define('B24_WEBHOOK_URL', 'http://ce255660.tw1.ru/rest/1/vw65vprt35ii6b2h/');
-
 define('CONTACT_FIELD_DATE', 'UF_CRM_1783519709');
 
 $request = $_REQUEST;
 
+// Логируем все входящие запросы
 file_put_contents(__DIR__ . '/webhook_log.txt', date('Y-m-d H:i:s') . " - " . print_r($request, true) . "\n", FILE_APPEND);
 
-if (isset($request['event']) && $request['event'] === 'ONCRACTIVITYADD' && !empty($request['data']['FIELDS']['ID'])) {
+// ВНИМАНИЕ: Опечатка ONCRMACTIVITYADD исправлена!
+if (isset($request['event']) && $request['event'] === 'ONCRMACTIVITYADD' && !empty($request['data']['FIELDS']['ID'])) {
     
     $activityId = intval($request['data']['FIELDS']['ID']);
 
+    // Получаем данные о созданном деле
     $activityData = executeREST('crm.activity.get', ['id' => $activityId]);
 
     if (!empty($activityData['result'])) {
         $activity = $activityData['result'];
         $contactId = null;
 
+        // Ищем привязку к Контакту (OWNER_TYPE_ID = 3)
         if (!empty($activity['BINDINGS'])) {
             foreach ($activity['BINDINGS'] as $binding) {
                 if ($binding['OWNER_TYPE_ID'] == 3) {
@@ -31,6 +34,7 @@ if (isset($request['event']) && $request['event'] === 'ONCRACTIVITYADD' && !empt
             }
         }
 
+        // Если контакт найден — обновляем поле с датой
         if ($contactId > 0) {
             $currentDate = date('c'); 
 
