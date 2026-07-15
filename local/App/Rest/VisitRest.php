@@ -5,15 +5,8 @@ use Bitrix\Rest\RestException;
 use App\Models\VisitLogTable;
 use App\Debug\Log;
 
-/**
- * Класс для обработки пользовательских REST-методов сущности "Журнал посещений" (VisitLog)
- */
 class VisitRest
 {
-    /**
-     * Регистрация кастомных REST методов в ядре Битрикс24
-     * * @return array Массив с описанием методов
-     */
     public static function OnRestServiceBuildDescription(): array
     {
         return [
@@ -27,12 +20,6 @@ class VisitRest
         ];
     }
 
-    /**
-     * Вспомогательный метод для логирования запросов (Используем класс из ДЗ №2)
-     * * @param string $method Название метода
-     * @param array $params Входящие параметры
-     * @param mixed $result Результат выполнения
-     */
     private static function logRequest(string $method, array $params, $result): void
     {
         Log::addLog([
@@ -42,9 +29,6 @@ class VisitRest
         ], false, 'rest_crud');
     }
 
-    /**
-     * Создание новой записи (Create)
-     */
     public static function add($arParams, $navStart, \CRestServer $server)
     {
         $data = $arParams['FIELDS'] ?? [];
@@ -64,9 +48,6 @@ class VisitRest
         throw new RestException(implode(', ', $result->getErrorMessages()), 'ERROR_CORE');
     }
 
-    /**
-     * Чтение одной записи по ID (Read)
-     */
     public static function get($arParams, $navStart, \CRestServer $server)
     {
         $id = (int)($arParams['ID'] ?? 0);
@@ -85,9 +66,6 @@ class VisitRest
         return $item;
     }
 
-    /**
-     * Обновление записи (Update)
-     */
     public static function update($arParams, $navStart, \CRestServer $server)
     {
         $id = (int)($arParams['ID'] ?? 0);
@@ -107,9 +85,6 @@ class VisitRest
         throw new RestException(implode(', ', $result->getErrorMessages()), 'ERROR_CORE');
     }
 
-    /**
-     * Удаление записи (Delete)
-     */
     public static function delete($arParams, $navStart, \CRestServer $server)
     {
         $id = (int)($arParams['ID'] ?? 0);
@@ -128,9 +103,6 @@ class VisitRest
         throw new RestException(implode(', ', $result->getErrorMessages()), 'ERROR_CORE');
     }
 
-    /**
-     * Получение списка записей (List)
-     */
     public static function getList($arParams, $navStart, \CRestServer $server)
     {
         $params = [

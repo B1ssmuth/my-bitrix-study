@@ -35,7 +35,6 @@ $eventManager->addEventHandler('iblock', 'OnAfterIBlockElementAdd', ['\\App\\Eve
 $eventManager->addEventHandler('iblock', 'OnAfterIBlockElementUpdate', ['\\App\\Events\\SyncDealIblock', 'syncFromIblock']);
 $eventManager->addEventHandler('crm', 'OnAfterCrmDealUpdate', ['\\App\\Events\\SyncDealIblock', 'syncFromDeal']);
 
-// Регистрация кастомных REST-методов для ДЗ 12
 $eventManager->addEventHandler(
     'rest',
     'OnRestServiceBuildDescription',
