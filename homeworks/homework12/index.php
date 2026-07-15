@@ -40,50 +40,45 @@ $logContent = $logExists ? file_get_contents($logFilePath) : '';
             <div class="row g-4 mt-2">
                 <div class="col-md-6">
                     <div class="p-3 bg-white border border-primary rounded h-100">
-                        <h6 class="text-primary fw-bold">🎯 Что требовалось сделать:</h6>
-                        <p class="small text-muted mb-0">
-                            Научиться расширять стандартное REST API Битрикс24. Если внешней системе (1С, мобильному приложению, сайту) нужно обмениваться данными с порталом, она не должна ходить напрямую в БД. Нужно было создать свои методы (CRUD) для пользовательской сущности и зарегистрировать их в ядре, соблюдая стандарты безопасности и логирования.
-                        </p>
+                        <h6 class="text-primary fw-bold">🎯 Реализация бизнес-логики:</h6>
+                        <ul class="small text-muted mb-0 ps-3">
+                            <li><b>Сущность:</b> ORM-таблица «Журнал посещений» (<code>VisitLogTable</code>) из ДЗ №4.</li>
+                            <li><b>Контроллер:</b> Создан класс <code>\App\Rest\VisitRest</code>, реализующий все 5 операций CRUD.</li>
+                            <li><b>Регистрация:</b> Через событие <code>OnRestServiceBuildDescription</code> добавлен scope <code>otus.visit</code>.</li>
+                            <li><b>Логирование:</b> Подключен кастомный логгер. Все входящие параметры и результаты пишутся в <code>rest_crud.log</code>.</li>
+                        </ul>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="p-3 bg-white border border-success rounded h-100">
-                        <h6 class="text-success fw-bold">💡 Как мы это реализовали:</h6>
+                        <h6 class="text-success fw-bold">✅ Соответствие критериям сдачи:</h6>
                         <ul class="small text-muted mb-0 ps-3">
-                            <li><b>Сущность:</b> Взята наша ORM-таблица «Журнал посещений» (<code>VisitLogTable</code>) из ДЗ №4.</li>
-                            <li><b>Контроллер:</b> Создан класс <code>\App\Rest\VisitRest</code>, обрабатывающий входящие данные.</li>
-                            <li><b>Регистрация:</b> Через событие <code>OnRestServiceBuildDescription</code> в ядро добавлен новый scope <code>otus.visit</code> и 5 методов.</li>
-                            <li><b>Логирование:</b> Подключен кастомный логгер из ДЗ №2. Все запросы пишутся в <code>rest_crud.log</code>.</li>
+                            <li>Зарегистрирован обработчик расширения REST-методов.</li>
+                            <li>Написаны полноценные методы: Create, Read, Update, Delete, List.</li>
+                            <li><b>Создано 5 отдельных входящих вебхуков</b>.</li>
+                            <li>В каждом вебхуке заранее <b>настроен генератор запросов</b> для тестирования в один клик.</li>
                         </ul>
                     </div>
                 </div>
-            </div>
-
-            <div class="mt-4">
-                <h6 class="fw-bold text-dark">Доступные методы (Scope: <code>otus.visit</code>):</h6>
-                <ul class="list-group list-group-flush border rounded shadow-sm mt-2">
-                    <li class="list-group-item">🟢 <b>otus.visit.add</b> — Создание записи <i>(Обязателен FIELDS[PATIENT_NAME])</i></li>
-                    <li class="list-group-item">🔵 <b>otus.visit.get</b> — Получение записи <i>(Обязателен ID)</i></li>
-                    <li class="list-group-item">🟠 <b>otus.visit.update</b> — Обновление записи <i>(Обязательны ID и FIELDS)</i></li>
-                    <li class="list-group-item">🔴 <b>otus.visit.delete</b> — Удаление записи <i>(Обязателен ID)</i></li>
-                    <li class="list-group-item">🟣 <b>otus.visit.list</b> — Вывод списка <i>(Поддерживает filter, select, limit)</i></li>
-                </ul>
             </div>
         </div>
     </div>
 
     <div class="card border-primary shadow-sm mb-4">
         <div class="card-header bg-primary text-white fw-bold fs-5">
-            🛠 Как протестировать методы через готовый Входящий вебхук
+            🛠 Как протестировать методы (Генераторы запросов)
         </div>
         <div class="card-body bg-white p-4">
+            <p class="fs-6 mb-3">
+                В системе создано 5 отдельных вебхуков для тестирования каждой операции. В каждом из них параметры уже предзаполнены.
+            </p>
             <ol class="fs-6 mb-0" style="line-height: 1.8;">
                 <li>Перейдите в раздел портала <a href="/devops/section/standard/" target="_blank" class="fw-bold text-decoration-none">Разработчикам ➔ Другое ➔ Входящий вебхук</a>.</li>
-                <li>Откройте уже созданный тестовый вебхук (у него в правах выдан доступ к <code>otus.visit</code>).</li>
-                <li>Перейдите в блок <b>«Генератор запросов»</b>.</li>
-                <li>В поле «Метод» впишите вручную: <code>otus.visit.add</code></li>
-                <li>В блоке «Параметры» нажмите «Добавить параметр»: ключ <code>FIELDS[PATIENT_NAME]</code>, значение <code>REST Тест</code>. Нажмите <b>«Выполнить»</b>.</li>
-                <li>Справа появится успешный ответ <code>"result": ID_записи</code>. Вы можете аналогично проверить чтение, вписав метод <code>otus.visit.get</code> и передав параметр <code>ID</code>.</li>
+                <li>В списке вы увидите 5 вебхуков (вида "REST CRUD: Создание", "REST CRUD: Чтение" и т.д.).</li>
+                <li>Откройте нужный вебхук и перейдите во вкладку <b>«Генератор запросов»</b>.</li>
+                <li>Там уже выбран корректный метод (например, <code>otus.visit.add</code>) и подставлены тестовые параметры.</li>
+                <li>Просто нажмите кнопку <b>«Выполнить»</b>. В правой части экрана отобразится JSON-ответ с результатом.</li>
+                <li><i>Примечание: для методов update, get и delete не забудьте указать в генераторе актуальный ID записи, которую вернул метод add.</i></li>
             </ol>
         </div>
     </div>
@@ -102,7 +97,7 @@ $logContent = $logExists ? file_get_contents($logFilePath) : '';
                 <pre class="mb-0 p-3 text-light" style="max-height: 500px; overflow-y: auto; font-size: 13px; font-family: 'Courier New', Courier, monospace; line-height: 1.4; background: #1e1e1e; border-radius: 0 0 6px 6px;"><?= htmlspecialchars(substr($logContent, -5000)) ?></pre>
             <?php else: ?>
                 <div class="p-4 text-muted text-center bg-light">
-                    Здесь будут логироваться все параметры и ответы ваших кастомных REST-запросов. Вызовите метод через Входящий вебхук, чтобы лог наполнился.
+                    Здесь логируются все параметры и ответы кастомных REST-запросов. Выполните любой метод через генератор вебхука, чтобы лог обновился.
                 </div>
             <?php endif; ?>
         </div>
