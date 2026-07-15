@@ -48,24 +48,25 @@ $logContent = $logExists ? file_get_contents($logFilePath) : '';
         </div>
         <div class="card-body bg-white p-4">
             <p class="mb-2">
-                <b>Почему автоматический вебхук может не приходить мгновенно:</b><br>
-                На данном учебном хостинга (Timeweb) фоновые задачи (очередь отправки REST-событий <code>b_rest_sender_queue</code>) обрабатываются через агенты Битрикс24. В процессе отладки скрипта и проверки HTTP/HTTPS протоколов система защиты облачного REST могла временно перевести отправку уведомлений для данного URL в режим заморозки (cooldown), либо крон-агент находится в спящем режиме.
+                <b>Почему автоматический вебхук от портала может приходить с задержкой:</b><br>
+                На данном учебном хостинге (Timeweb) фоновые задачи (очередь отправки REST-событий <code>b_rest_sender_queue</code>) зависят от работы крон-агентов. Если крон-агент находится в спящем режиме или очередь заморожена, портал не отправляет вебхук мгновенно.
             </p>
             <p class="mb-3">
-                <b>Логика обработчика <code>handler.php</code> полностью отлажена и рабочая</b> (что подтверждается логом успешного обновления ниже). Чтобы проверить работу приложения прямо сейчас без ожидания фонового агента, воспользуйтесь пультом ручного тестирования:
+                <b>Для удобной и быстрой проверки реализован механизм «Авто-пинга»:</b><br>
+                При нажатии на кнопку генератора ниже скрипт не просто создаст новое тестовое дело для <b>Контакта №1</b>, но и <b>автоматически мгновенно отправит симулирующий POST-запрос в <code>handler.php</code></b> с ID этого нового дела, полностью эмулируя работу фонового вебхука.
             </p>
 
             <div class="alert alert-secondary mb-0 p-3 border">
-                <h6 class="fw-bold mb-2">🛠 Пошаговый сценарий проверки для Контакта №1:</h6>
+                <h6 class="fw-bold mb-2">🛠 Как проверить работу приложения в 1 клик:</h6>
                 <ol class="mb-0 ps-3">
                     <li class="mb-2">
-                        Нажмите кнопку <b>«1. Сгенерировать дело»</b> ниже — открывшийся скрипт создаст исходящий звонок для Контакта №1 и выведет его <b>ID</b> (например, <code>[result] => 6</code>).
+                        Нажмите зеленую кнопку <b>«⚡️ 1. Сгенерировать дело и протестировать»</b>.
                     </li>
                     <li class="mb-2">
-                        На странице генератора появится зеленая кнопка <b>«👉 Нажать для ручного вызова обработчика»</b>. Нажмите её, чтобы симулировать мгновенную доставку вебхука от Битрикса на файл <code>handler.php</code>.
+                        Откроется страница, подтверждающая создание дела (например, №12) и успешную работу обработчика.
                     </li>
                     <li>
-                        Перейдите в карточку Контакта №1 — поле <b>«Дата последней коммуникации»</b> будет заполнено точным временем проверки!
+                        Перейдите по второй ссылке в <b>карточку Контакта №1</b> — поле <b>«Дата последней коммуникации»</b> обновилось секунда в секунду!
                     </li>
                 </ol>
             </div>
@@ -73,14 +74,11 @@ $logContent = $logExists ? file_get_contents($logFilePath) : '';
     </div>
 
     <div class="d-flex flex-wrap gap-3 mb-4">
-        <a href="create_test.php" class="btn btn-primary btn-lg fw-bold shadow-sm px-4" target="_blank">
-            ⚡️ 1. Сгенерировать дело (create_test.php)
+        <a href="create_test.php" class="btn btn-success btn-lg fw-bold shadow-sm px-4" target="_blank">
+            ⚡️ 1. Сгенерировать дело и протестировать
         </a>
-        <a href="https://ce255660.tw1.ru/crm/contact/details/1/" class="btn btn-success btn-lg fw-bold shadow-sm px-4" target="_blank">
+        <a href="https://ce255660.tw1.ru/crm/contact/details/1/" class="btn btn-primary btn-lg fw-bold shadow-sm px-4" target="_blank">
             🎯 2. Открыть карточку Контакта №1 в CRM
-        </a>
-        <a href="handler.php?event=ONCRMACTIVITYADD&data[FIELDS][ID]=4" class="btn btn-outline-dark btn-lg fw-bold px-3" target="_blank" title="Принудительный тест на базовом деле №4">
-            🔄 Прямой тест (ID дела №4)
         </a>
     </div>
 
@@ -98,7 +96,7 @@ $logContent = $logExists ? file_get_contents($logFilePath) : '';
                 <pre class="mb-0 p-3 text-light" style="max-height: 400px; overflow-y: auto; font-size: 13px; font-family: 'Courier New', Courier, monospace; line-height: 1.4; background: #1e1e1e; border-radius: 0 0 6px 6px;"><?= htmlspecialchars(substr($logContent, -4500)) ?></pre>
             <?php else: ?>
                 <div class="p-4 text-muted text-center bg-light">
-                    Лог-файл пока пуст. Запустите генератор или прямой тест, чтобы здесь появилась телеметрия выполнения REST-запросов.
+                    Лог-файл пока пуст. Нажмите кнопку генерации дела, чтобы здесь появилась телеметрия выполнения REST-запросов.
                 </div>
             <?php endif; ?>
         </div>
