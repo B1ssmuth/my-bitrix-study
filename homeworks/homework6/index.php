@@ -5,7 +5,7 @@ use Bitrix\Main\Loader;
 use Bitrix\Main\ModuleManager;
 use Bitrix\Main\Page\Asset;
 
-$APPLICATION->SetTitle("ДЗ #6: Собственный модуль otus.crmtab");
+$APPLICATION->SetTitle("ДЗ №6: Собственный модуль otus.crmtab");
 
 Asset::getInstance()->addCss('//cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css');
 
