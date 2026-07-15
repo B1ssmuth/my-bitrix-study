@@ -73,7 +73,7 @@ $logContent = $logExists ? file_get_contents($logFilePath) : '';
                 В системе создано 5 отдельных вебхуков для тестирования каждой операции. В каждом из них параметры уже предзаполнены.
             </p>
             <ol class="fs-6 mb-0" style="line-height: 1.8;">
-                <li>Перейдите в раздел портала <a href="/devops/section/standard/" target="_blank" class="fw-bold text-decoration-none">Разработчикам ➔ Другое ➔ Входящий вебхук</a>.</li>
+                <li>Перейдите в раздел портала <a href="/devops/list/" target="_blank" class="fw-bold text-decoration-none">Разработчикам ➔ Интеграции</a>.</li>
                 <li>В списке вы увидите 5 вебхуков (вида "REST CRUD: Создание", "REST CRUD: Чтение" и т.д.).</li>
                 <li>Откройте нужный вебхук и перейдите во вкладку <b>«Генератор запросов»</b>.</li>
                 <li>Там уже выбран корректный метод (например, <code>otus.visit.add</code>) и подставлены тестовые параметры.</li>
