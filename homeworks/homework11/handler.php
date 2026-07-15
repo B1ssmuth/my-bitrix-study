@@ -4,31 +4,26 @@
  * Обработчик создания дела, который обновляет дату в Контакте
  */
 
-// ВАЖНО: Здесь теперь строго HTTPS!
 define('B24_WEBHOOK_URL', 'https://ce255660.tw1.ru/rest/1/vw65vprt35ii6b2h/');
 define('CONTACT_FIELD_DATE', 'UF_CRM_1783519709');
 
 $request = $_REQUEST;
 $logFile = __DIR__ . '/webhook_log.txt';
 
-// 1. Логируем старт и входящий запрос
 file_put_contents($logFile, date('Y-m-d H:i:s') . " - СТАРТ. Входящий запрос: " . print_r($request, true) . "\n", FILE_APPEND);
 
 if (isset($request['event']) && $request['event'] === 'ONCRMACTIVITYADD' && !empty($request['data']['FIELDS']['ID'])) {
     
     $activityId = intval($request['data']['FIELDS']['ID']);
 
-    // 2. Получаем данные о созданном деле по HTTPS
     $activityData = executeREST('crm.activity.get', ['id' => $activityId]);
 
-    // Логируем ответ от Битрикса по делу
     file_put_contents($logFile, date('Y-m-d H:i:s') . " - Данные дела $activityId: " . print_r($activityData, true) . "\n", FILE_APPEND);
 
     if (!empty($activityData['result'])) {
         $activity = $activityData['result'];
         $contactId = null;
 
-        // Ищем ID контакта (3 — системный код сущности Контакт)
         if (isset($activity['OWNER_TYPE_ID']) && $activity['OWNER_TYPE_ID'] == 3) {
             $contactId = intval($activity['OWNER_ID']);
         }
@@ -49,7 +44,6 @@ if (isset($request['event']) && $request['event'] === 'ONCRMACTIVITYADD' && !emp
             }
         }
 
-        // 3. Обновляем контакт
         if ($contactId > 0) {
             $currentDate = date('c'); 
 

@@ -1,24 +1,21 @@
 <?php
-// Ссылка с правильным https://
 $webhookUrl = 'https://ce255660.tw1.ru/rest/1/vw65vprt35ii6b2h/crm.activity.add.json';
 
-// !!! ВПИШИ СЮДА ID ТВОЕГО КОНТАКТА !!!
 $contactId = 1; 
 
 $queryData = http_build_query([
     'fields' => [
-        'OWNER_TYPE_ID' => 3, // Системный ID Контакта
+        'OWNER_TYPE_ID' => 3,
         'OWNER_ID' => $contactId,
-        'TYPE_ID' => 2, // Звонок
+        'TYPE_ID' => 2,
         'SUBJECT' => 'Тестовое дело из REST API (Хак)',
-        'DIRECTION' => 2, // Исходящий
+        'DIRECTION' => 2,
         'COMPLETED' => 'N',
-        // Добавили обязательный массив коммуникаций для Звонка:
         'COMMUNICATIONS' => [
             [
                 'ENTITY_ID' => $contactId,
                 'ENTITY_TYPE_ID' => 3,
-                'VALUE' => '+7 (999) 000-00-00' // Телефон для вида
+                'VALUE' => '+7 (999) 000-00-00'
             ]
         ]
     ]
