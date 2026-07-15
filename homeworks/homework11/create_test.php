@@ -1,5 +1,5 @@
 <?php
-$webhookUrl = 'http://ce255660.tw1.ru/rest/1/vw65vprt35ii6b2h/crm.activity.add.json';
+$webhookUrl = 'https://ce255660.tw1.ru/rest/1/vw65vprt35ii6b2h/crm.activity.add.json';
 
 $contactId = 15; 
 

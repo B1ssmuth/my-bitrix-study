@@ -4,7 +4,7 @@
  * Обработчик создания дела, который обновляет дату в Контакте
  */
 
-define('B24_WEBHOOK_URL', 'http://ce255660.tw1.ru/rest/1/vw65vprt35ii6b2h/');
+define('B24_WEBHOOK_URL', 'https://ce255660.tw1.ru/rest/1/vw65vprt35ii6b2h/');
 define('CONTACT_FIELD_DATE', 'UF_CRM_1783519709');
 
 $request = $_REQUEST;
