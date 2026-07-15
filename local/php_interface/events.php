@@ -34,3 +34,10 @@ $eventManager->addEventHandler(
 $eventManager->addEventHandler('iblock', 'OnAfterIBlockElementAdd', ['\\App\\Events\\SyncDealIblock', 'syncFromIblock']);
 $eventManager->addEventHandler('iblock', 'OnAfterIBlockElementUpdate', ['\\App\\Events\\SyncDealIblock', 'syncFromIblock']);
 $eventManager->addEventHandler('crm', 'OnAfterCrmDealUpdate', ['\\App\\Events\\SyncDealIblock', 'syncFromDeal']);
+
+// Регистрация кастомных REST-методов для ДЗ 12
+$eventManager->addEventHandler(
+    'rest',
+    'OnRestServiceBuildDescription',
+    ['\\App\\Rest\\VisitRest', 'OnRestServiceBuildDescription']
+);
