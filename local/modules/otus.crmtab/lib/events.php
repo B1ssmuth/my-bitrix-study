@@ -12,7 +12,6 @@ class Events
 {
     /**
      * Обработчик добавления кастомной вкладки в карточку CRM.
-     * Название метода оставлено addVisitLogTab для совместимости со старой регистрацией события.
      */
     public static function addVisitLogTab(Event $event)
     {
@@ -20,14 +19,16 @@ class Events
         $entityTypeID = $event->getParameter('entityTypeID');
         $tabs = $event->getParameter('tabs');
 
-        // По ТЗ: вкладка должна быть у контакта-физлица
+        // По ТЗ: вкладка должна быть у контакта-физлица[cite: 2]
         if ($entityTypeID === \CCrmOwnerType::Contact) {
+            
+            // КЛЮЧЕВОЙ МОМЕНТ: Загружаем JS-ядро грида в родительскую страницу CRM
+            \Bitrix\Main\UI\Extension::load(["ui.grid", "main.ui.grid", "ui.buttons"]);
+
             $tabs[] = [
                 'id' => 'garage_tab',
-                // Используем языковую фразу, если нет - fallback на "Гараж"
                 'name' => Loc::getMessage('OTUS_CRMTAB_GARAGE_NAME') ?: 'Гараж',
                 'loader' => [
-                    // Ссылка на lazyload файл нашего компонента
                     'serviceUrl' => '/local/components/otus/cars.grid/lazyload.php?CONTACT_ID=' . $entityID . '&site=' . SITE_ID . '&' . bitrix_sessid_get(),
                     'componentData' => [
                         'template' => '',
