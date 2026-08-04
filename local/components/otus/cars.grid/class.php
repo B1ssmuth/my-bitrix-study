@@ -19,6 +19,9 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
             ],
             'addCar' => [
                 'prefilters' => [] // Разрешаем метод добавления авто
+            ],
+            'deleteCar' => [
+                'prefilters' => []
             ]
         ];
     }
@@ -67,6 +70,17 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
         }
 
         return ['dealId' => $dealId];
+    }
+
+    public function deleteCarAction($carId)
+    {
+        Loader::includeModule('crm');
+        $result = CarsTable::delete($carId);
+        
+        if (!$result->isSuccess()) {
+            return ['error' => implode(', ', $result->getErrorMessages())];
+        }
+        return ['success' => true];
     }
 
     /**
@@ -138,6 +152,10 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
                             'text' => 'Создать заказ-наряд',
                             // Передаем название машины для формирования заголовка сделки
                             'onclick' => 'createDealForCar(' . $car['ID'] . ', ' . $contactId . ', "' . $carTitle . '")' 
+                        ],
+                        [
+                            'text' => 'Удалить авто',
+                            'onclick' => 'deleteCar(' . $car['ID'] . ', ' . $contactId . ')' 
                         ]
                     ]
                 ];

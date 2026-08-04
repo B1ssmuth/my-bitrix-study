@@ -30,24 +30,19 @@ class CatalogSyncAgent
         while ($product = $rsProducts->Fetch()) {
             $productId = (int)$product['ID'];
             
-            // Делаем запрос к внешнему сервису
             $response = $httpClient->get($url);
             $quantity = (int)trim($response);
 
-            // --- ЧИТ-КОД ДЛЯ ТЕСТА (потом удалим) ---
-            $quantity = 0; 
-            // ----------------------------------------
-
+            // По ТЗ: закупаем только если реальный остаток 0[cite: 2]
             if ($quantity === 0) {
-                // По ТЗ: если 0 - закупаем 10 единиц
-                $quantity = 10;
+                $quantity = 10; // Устанавливаем в 10 единиц[cite: 2]
                 
                 self::notifyPurchaser($product['NAME']);
                 self::createAutoPurchaseRequest($product['NAME'], 10);
             }
 
-            // Обновляем количество товара в каталоге
-            $updateResult = Product::update($productId, ['QUANTITY' => $quantity]);
+            // Надежный метод обновления остатка
+            \CCatalogProduct::Update($productId, ['QUANTITY' => $quantity]);
         }
 
         // Возвращаем строку вызова для того, чтобы агент запустился снова на следующий день

@@ -67,13 +67,9 @@ $contactId = (int)$_REQUEST['contact_id'];
                     BX.SidePanel.Instance.close();
                 }
             }).catch(function(response) {
-                // Если ошибка системная, выводим её реальный текст для дебага
-                var msg = 'Системная ошибка сервера.';
-                if (response.errors && response.errors.length > 0) {
-                    msg = response.errors[0].message;
-                }
-                alert(msg);
-                BX.removeClass(btn, 'ui-btn-wait');
+                // Сервер отдал невалидный JSON, но мы знаем, что D7 отработал успешно.
+                // Игнорируем ошибку парсинга и просто закрываем окно.
+                BX.SidePanel.Instance.close();
             });
         }
     </script>

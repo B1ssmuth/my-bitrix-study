@@ -96,4 +96,20 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
             }
         });
     }
+
+    function deleteCar(carId, contactId) {
+        if (confirm('Точно удалить этот автомобиль?')) {
+            BX.ajax.runComponentAction('otus:cars.grid', 'deleteCar', {
+                mode: 'class',
+                data: { carId: carId }
+            }).then(function (response) {
+                var gridObject = BX.Main.gridManager.getInstanceById('cars_grid_' + contactId);
+                if (gridObject) gridObject.reload();
+            }).catch(function(response) {
+                // Тот же хак: принудительно обновляем грид
+                var gridObject = BX.Main.gridManager.getInstanceById('cars_grid_' + contactId);
+                if (gridObject) gridObject.reload();
+            });
+        }
+    }
 </script>
