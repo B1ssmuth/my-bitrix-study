@@ -27,12 +27,30 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
     {
         Loader::includeModule('crm');
         
-        // ВАЖНО: Впиши сюда ID воронки, которую ты только что создал!
-        $categoryId = 1; 
+        $categoryId = 1; // Твой ID воронки
         $carFieldCode = 'UF_CRM_1785836988'; // Твой код поля
 
+        // 1. Проверяем наличие открытых сделок до попытки создания для красивого UX
+        $dbRes = \CCrmDeal::GetListEx(
+            [],
+            [
+                '=' . $carFieldCode => $carId,
+                '=CATEGORY_ID' => $categoryId,
+                '!=STAGE_SEMANTIC_ID' => ['S', 'F'], 
+                'CHECK_PERMISSIONS' => 'N'
+            ],
+            false,
+            ['nTopCount' => 1],
+            ['ID']
+        );
+
+        if ($openDeal = $dbRes->Fetch()) {
+            return ['error' => 'Внимание! По данному автомобилю уже есть незакрытый заказ-наряд (Сделка #' . $openDeal['ID'] . '). Закройте его перед созданием нового.'];
+        }
+
+        // 2. Если открытых сделок нет - создаем новую
         $fields = [
-            'TITLE' => 'Заказ-наряд: ' . $carTitle, // Сразу делаем красивое название[cite: 2]
+            'TITLE' => 'Заказ-наряд: ' . $carTitle,
             'CATEGORY_ID' => $categoryId,
             'CONTACT_ID' => $contactId,
             $carFieldCode => $carId,
@@ -42,7 +60,7 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
         $dealId = $deal->Add($fields, true, ['DISABLE_USER_FIELD_CHECK' => true]);
 
         if (!$dealId) {
-            return ['error' => $deal->LAST_ERROR];
+            return ['error' => 'Ошибка создания сделки: ' . $deal->LAST_ERROR];
         }
 
         return ['dealId' => $dealId];
