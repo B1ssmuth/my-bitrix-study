@@ -13,10 +13,14 @@ class CarsGridComponent extends \CBitrixComponent
         
         $contactId = (int)($this->arParams['CONTACT_ID'] ?? 0);
 
-        // Уникальный ID грида для конкретного контакта
+        // Уникальный ID грида
         $this->arResult['GRID_ID'] = 'cars_grid_' . $contactId;
 
-        // Формируем колонки согласно ТЗ
+        // Инициализируем настройки грида для работы "шестеренки"
+        $gridOptions = new \Bitrix\Main\Grid\Options($this->arResult['GRID_ID']);
+        $sort = $gridOptions->GetSorting(['sort' => ['ID' => 'DESC'], 'vars' => ['by' => 'by', 'order' => 'order']]);
+
+        // Колонки
         $this->arResult['COLUMNS'] = [
             ['id' => 'ID', 'name' => 'ID', 'sort' => 'ID', 'default' => false],
             ['id' => 'BRAND', 'name' => Loc::getMessage('APP_CARS_FIELD_BRAND') ?: 'Марка', 'sort' => 'BRAND', 'default' => true],
@@ -30,19 +34,20 @@ class CarsGridComponent extends \CBitrixComponent
         $this->arResult['ROWS'] = [];
 
         if ($contactId > 0) {
-            // Запрашиваем автомобили из нашей новой таблицы
+            // Чтобы сортировка работала при клике на заголовки
+            $order = $sort['sort'];
+
             $cars = CarsTable::getList([
                 'filter' => ['=CONTACT_ID' => $contactId],
-                'select' => ['ID', 'BRAND', 'MODEL', 'REG_NUMBER', 'YEAR', 'COLOR', 'MILEAGE']
+                'select' => ['ID', 'BRAND', 'MODEL', 'REG_NUMBER', 'YEAR', 'COLOR', 'MILEAGE'],
+                'order' => $order // Применяем сортировку
             ])->fetchAll();
 
             foreach ($cars as $car) {
-                // Подготавливаем заголовок для будущего всплывающего окна
                 $carTitle = htmlspecialcharsbx($car['BRAND'] . ' ' . $car['MODEL'] . ' - ' . $car['REG_NUMBER']);
                 
                 $this->arResult['ROWS'][] = [
                     'data' => $car,
-                    // Добавляем действие при нажатии на строку (вызов всплывающего окна истории)
                     'actions' => [
                         [
                             'text' => 'История обслуживания',

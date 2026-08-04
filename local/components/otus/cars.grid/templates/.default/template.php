@@ -1,6 +1,7 @@
 <?php
 if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
-\Bitrix\Main\UI\Extension::load("ui.buttons");
+// Принудительно грузим скрипты грида и кнопок
+\Bitrix\Main\UI\Extension::load(["ui.buttons", "ui.grid", "main.ui.grid"]);
 ?>
 
 <div class="cars-grid-container" style="padding: 15px;">

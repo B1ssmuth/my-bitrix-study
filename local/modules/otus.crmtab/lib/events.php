@@ -28,7 +28,7 @@ class Events
                 'name' => Loc::getMessage('OTUS_CRMTAB_GARAGE_NAME') ?: 'Гараж',
                 'loader' => [
                     // Ссылка на lazyload файл нашего компонента
-                    'serviceUrl' => '/local/components/otus/cars.grid/lazyload.php?&site=' . SITE_ID . '&' . bitrix_sessid_get(),
+                    'serviceUrl' => '/local/components/otus/cars.grid/lazyload.php?CONTACT_ID=' . $entityID . '&site=' . SITE_ID . '&' . bitrix_sessid_get(),
                     'componentData' => [
                         'template' => '',
                         'params' => [
