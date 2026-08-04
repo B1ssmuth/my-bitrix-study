@@ -41,9 +41,57 @@ $carTitle = $_REQUEST['car_title'] ?? 'История обслуживания';
             ['id' => 'SPARE_PARTS', 'name' => 'Список запчастей', 'default' => true],
         ];
 
-        // Временно оставляем массив пустым. 
-        // На следующем этапе мы сделаем выборку реальных сделок из CRM по ID автомобиля.
+        \Bitrix\Main\Loader::includeModule('crm');
+
+        $carFieldCode = 'UF_CRM_1785836988'; 
+
         $rows = [];
+        
+        if ($carId > 0) {
+            // Запрашиваем сделки, привязанные к этому автомобилю
+            $dealRes = \CCrmDeal::GetListEx(
+                ['DATE_CREATE' => 'DESC'],
+                [$carFieldCode => $carId, 'CHECK_PERMISSIONS' => 'N'], // Обходим права для системного показа
+                false,
+                false,
+                ['ID', 'TITLE', 'DATE_CREATE', 'STAGE_ID', 'ASSIGNED_BY_ID', 'ASSIGNED_BY_NAME', 'ASSIGNED_BY_LAST_NAME', 'OPPORTUNITY', 'CURRENCY_ID']
+            );
+
+            // Получаем человекопонятные названия стадий
+            $stages = \CCrmStatus::GetStatusList('DEAL_STAGE');
+
+            while ($deal = $dealRes->Fetch()) {
+                
+                // Формируем ссылку на профиль ответственного
+                $userLink = '<a href="/company/personal/user/'.$deal['ASSIGNED_BY_ID'].'/" target="_blank">' . 
+                            htmlspecialcharsbx($deal['ASSIGNED_BY_NAME'] . ' ' . $deal['ASSIGNED_BY_LAST_NAME']) . 
+                            '</a>';
+
+                // Получаем товары сделки (список запчастей)[cite: 2]
+                $products = \CCrmDeal::LoadProductRows($deal['ID']);
+                $partsList = [];
+                foreach ($products as $product) {
+                    $partsList[] = htmlspecialcharsbx($product['PRODUCT_NAME']) . ' (' . (float)$product['QUANTITY'] . ' шт.)';
+                }
+                $partsString = empty($partsList) ? '-' : implode('<br>', $partsList);
+
+                // Форматируем сумму
+                $currency = $deal['CURRENCY_ID'] ?: \CCrmCurrency::GetBaseCurrencyID();
+                $money = \CCrmCurrency::MoneyToString($deal['OPPORTUNITY'], $currency);
+
+                $rows[] = [
+                    'id' => $deal['ID'],
+                    'data' => [
+                        'TITLE' => htmlspecialcharsbx($deal['TITLE']),
+                        'DATE_CREATE' => FormatDate('d.m.Y H:i', MakeTimeStamp($deal['DATE_CREATE'])),
+                        'STAGE_ID' => htmlspecialcharsbx($stages[$deal['STAGE_ID']] ?? $deal['STAGE_ID']),
+                        'ASSIGNED_BY' => $userLink,
+                        'OPPORTUNITY' => $money,
+                        'SPARE_PARTS' => $partsString,
+                    ]
+                ];
+            }
+        }
 
         $APPLICATION->IncludeComponent('bitrix:main.ui.grid', '', [
             'GRID_ID' => 'car_history_deals_' . $carId,
