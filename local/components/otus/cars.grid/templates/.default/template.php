@@ -47,11 +47,33 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
         });
     }
 
-    function createDealForCar(carId, contactId) {
-        // Открываем слайдер создания сделки и передаем параметры в URL
-        BX.SidePanel.Instance.open(
-            '/crm/deal/details/0/?contact_id=' + contactId + '&UF_CRM_1785836988=' + carId, 
-            { cacheable: false }
-        );
+    function createDealForCar(carId, contactId, carTitle) {
+        // Отправляем D7-запрос к нашему компоненту
+        BX.ajax.runComponentAction('otus:cars.grid', 'createDeal', {
+            mode: 'class',
+            data: {
+                carId: carId,
+                contactId: contactId,
+                carTitle: carTitle
+            }
+        }).then(function (response) {
+            if (response.data.dealId) {
+                // Если сделка создана, открываем её карточку
+                BX.SidePanel.Instance.open(
+                    '/crm/deal/details/' + response.data.dealId + '/', 
+                    { cacheable: false }
+                );
+            } else if (response.data.error) {
+                // Если сработал наш обработчик (например, уже есть открытая сделка), выводим ошибку
+                alert(response.data.error);
+            }
+        }).catch(function(response) {
+            // Перехват системных ошибок D7 (включая ThrowException)
+            let errorText = 'Произошла ошибка при создании заказ-наряда.';
+            if (response.errors && response.errors.length > 0) {
+                errorText = response.errors[0].message;
+            }
+            alert(errorText);
+        });
     }
 </script>

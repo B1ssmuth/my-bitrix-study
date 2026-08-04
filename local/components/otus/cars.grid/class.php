@@ -4,23 +4,60 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 use Bitrix\Main\Loader;
 use App\Models\Lists\CarsTable;
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\Engine\Contract\Controllerable;
 
-class CarsGridComponent extends \CBitrixComponent
+class CarsGridComponent extends \CBitrixComponent implements Controllerable
 {
+    /**
+     * Обязательный метод для Controllerable
+     */
+    public function configureActions()
+    {
+        return [
+            'createDeal' => [
+                'prefilters' => [] // Разрешаем вызов без строгих фильтров (для внутреннего использования)
+            ]
+        ];
+    }
+
+    /**
+     * AJAX-метод создания сделки
+     */
+    public function createDealAction($carId, $contactId, $carTitle)
+    {
+        Loader::includeModule('crm');
+        
+        // ВАЖНО: Впиши сюда ID воронки, которую ты только что создал!
+        $categoryId = 1; 
+        $carFieldCode = 'UF_CRM_1785836988'; // Твой код поля
+
+        $fields = [
+            'TITLE' => 'Заказ-наряд: ' . $carTitle, // Сразу делаем красивое название[cite: 2]
+            'CATEGORY_ID' => $categoryId,
+            'CONTACT_ID' => $contactId,
+            $carFieldCode => $carId,
+        ];
+
+        $deal = new \CCrmDeal(false);
+        $dealId = $deal->Add($fields, true, ['DISABLE_USER_FIELD_CHECK' => true]);
+
+        if (!$dealId) {
+            return ['error' => $deal->LAST_ERROR];
+        }
+
+        return ['dealId' => $dealId];
+    }
+
     public function executeComponent()
     {
         Loader::includeModule('crm');
         
         $contactId = (int)($this->arParams['CONTACT_ID'] ?? 0);
-
-        // Уникальный ID грида
         $this->arResult['GRID_ID'] = 'cars_grid_' . $contactId;
 
-        // Инициализируем настройки грида для работы "шестеренки"
         $gridOptions = new \Bitrix\Main\Grid\Options($this->arResult['GRID_ID']);
         $sort = $gridOptions->GetSorting(['sort' => ['ID' => 'DESC'], 'vars' => ['by' => 'by', 'order' => 'order']]);
 
-        // Колонки
         $this->arResult['COLUMNS'] = [
             ['id' => 'ID', 'name' => 'ID', 'sort' => 'ID', 'default' => false],
             ['id' => 'BRAND', 'name' => Loc::getMessage('APP_CARS_FIELD_BRAND') ?: 'Марка', 'sort' => 'BRAND', 'default' => true],
@@ -34,13 +71,12 @@ class CarsGridComponent extends \CBitrixComponent
         $this->arResult['ROWS'] = [];
 
         if ($contactId > 0) {
-            // Чтобы сортировка работала при клике на заголовки
             $order = $sort['sort'];
 
             $cars = CarsTable::getList([
                 'filter' => ['=CONTACT_ID' => $contactId],
                 'select' => ['ID', 'BRAND', 'MODEL', 'REG_NUMBER', 'YEAR', 'COLOR', 'MILEAGE'],
-                'order' => $order // Применяем сортировку
+                'order' => $order
             ])->fetchAll();
 
             foreach ($cars as $car) {
@@ -55,8 +91,8 @@ class CarsGridComponent extends \CBitrixComponent
                         ],
                         [
                             'text' => 'Создать заказ-наряд',
-                            // Передаем ID машины и ID контакта
-                            'onclick' => 'createDealForCar(' . $car['ID'] . ', ' . $contactId . ')' 
+                            // Передаем название машины для формирования заголовка сделки
+                            'onclick' => 'createDealForCar(' . $car['ID'] . ', ' . $contactId . ', "' . $carTitle . '")' 
                         ]
                     ]
                 ];
