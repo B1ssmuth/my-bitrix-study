@@ -66,6 +66,30 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
         return ['dealId' => $dealId];
     }
 
+    /**
+     * AJAX-метод добавления нового автомобиля
+     */
+    public function addCarAction($contactId, $brand, $model, $regNumber, $year, $color, $mileage)
+    {
+        Loader::includeModule('crm');
+        
+        $result = CarsTable::add([
+            'CONTACT_ID' => (int)$contactId,
+            'BRAND' => trim($brand),
+            'MODEL' => trim($model),
+            'REG_NUMBER' => trim($regNumber),
+            'YEAR' => (int)$year,
+            'COLOR' => trim($color),
+            'MILEAGE' => (int)$mileage
+        ]);
+
+        if (!$result->isSuccess()) {
+            return ['error' => implode(', ', $result->getErrorMessages())];
+        }
+
+        return ['success' => true];
+    }
+
     public function executeComponent()
     {
         Loader::includeModule('crm');

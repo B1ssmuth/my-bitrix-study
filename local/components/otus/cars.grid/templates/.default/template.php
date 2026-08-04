@@ -4,6 +4,10 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
 \Bitrix\Main\UI\Extension::load(["ui.buttons", "ui.grid", "main.ui.grid"]);
 ?>
 
+<div style="margin-bottom: 15px; padding-left: 15px; padding-top: 15px;">
+    <button class="ui-btn ui-btn-primary" onclick="openAddCarForm(<?= (int)$arParams['CONTACT_ID'] ?>)">+ Добавить автомобиль</button>
+</div>
+
 <div class="cars-grid-container" style="padding: 15px;">
     <?php
     $APPLICATION->IncludeComponent('bitrix:main.ui.grid', '', [
@@ -74,6 +78,22 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
                 errorText = response.errors[0].message;
             }
             alert(errorText);
+        });
+    }
+
+    function openAddCarForm(contactId) {
+        BX.SidePanel.Instance.open('/local/components/otus/cars.grid/slider_add_car.php?contact_id=' + contactId, {
+            width: 500,
+            cacheable: false,
+            events: {
+                onClose: function() {
+                    // Перезагружаем грид после закрытия слайдера
+                    var gridObject = BX.Main.gridManager.getInstanceById('cars_grid_' + contactId);
+                    if (gridObject) {
+                        gridObject.reload();
+                    }
+                }
+            }
         });
     }
 </script>
