@@ -1,0 +1,9 @@
+<?php
+$MESS['APP_CARS_FIELD_ID'] = 'ID';
+$MESS['APP_CARS_FIELD_CONTACT_ID'] = 'ID Контакта';
+$MESS['APP_CARS_FIELD_BRAND'] = 'Марка';
+$MESS['APP_CARS_FIELD_MODEL'] = 'Модель';
+$MESS['APP_CARS_FIELD_REG_NUMBER'] = 'Номер';
+$MESS['APP_CARS_FIELD_YEAR'] = 'Год';
+$MESS['APP_CARS_FIELD_COLOR'] = 'Цвет';
+$MESS['APP_CARS_FIELD_MILEAGE'] = 'Пробег';
