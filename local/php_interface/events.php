@@ -35,6 +35,9 @@ $eventManager->addEventHandler('iblock', 'OnAfterIBlockElementAdd', ['\\App\\Eve
 $eventManager->addEventHandler('iblock', 'OnAfterIBlockElementUpdate', ['\\App\\Events\\SyncDealIblock', 'syncFromIblock']);
 $eventManager->addEventHandler('crm', 'OnAfterCrmDealUpdate', ['\\App\\Events\\SyncDealIblock', 'syncFromDeal']);
 
+// НАШ НОВЫЙ ОБРАБОТЧИК ДЛЯ АВТОСЕРВИСА:
+$eventManager->addEventHandler('crm', 'OnBeforeCrmDealAdd', ['\\App\\Events\\GarageDealHandlers', 'checkOpenDeals']);
+
 $eventManager->addEventHandler(
     'rest',
     'OnRestServiceBuildDescription',

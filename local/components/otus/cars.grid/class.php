@@ -52,6 +52,11 @@ class CarsGridComponent extends \CBitrixComponent
                         [
                             'text' => 'История обслуживания',
                             'onclick' => 'showCarHistory(' . $car['ID'] . ', "' . $carTitle . '")'
+                        ],
+                        [
+                            'text' => 'Создать заказ-наряд',
+                            // Передаем ID машины и ID контакта
+                            'onclick' => 'createDealForCar(' . $car['ID'] . ', ' . $contactId . ')' 
                         ]
                     ]
                 ];

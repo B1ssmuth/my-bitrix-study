@@ -46,4 +46,12 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
             cacheable: false
         });
     }
+
+    function createDealForCar(carId, contactId) {
+        // Открываем слайдер создания сделки и передаем параметры в URL
+        BX.SidePanel.Instance.open(
+            '/crm/deal/details/0/?contact_id=' + contactId + '&UF_CRM_1785836988=' + carId, 
+            { cacheable: false }
+        );
+    }
 </script>
