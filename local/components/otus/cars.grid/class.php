@@ -15,7 +15,10 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
     {
         return [
             'createDeal' => [
-                'prefilters' => [] // Разрешаем вызов без строгих фильтров (для внутреннего использования)
+                'prefilters' => []
+            ],
+            'addCar' => [
+                'prefilters' => [] // Разрешаем метод добавления авто
             ]
         ];
     }

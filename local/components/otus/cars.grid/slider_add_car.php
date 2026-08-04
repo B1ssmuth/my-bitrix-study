@@ -41,7 +41,11 @@ $contactId = (int)$_REQUEST['contact_id'];
     <script>
         function saveCar() {
             var btn = BX('saveBtn');
-            BX.addClass(btn, 'ui-btn-wait'); // Анимация загрузки
+            BX.addClass(btn, 'ui-btn-wait');
+
+            // Защита от пустых строк в числовых полях
+            var yearVal = BX('YEAR').value;
+            var mileageVal = BX('MILEAGE').value;
 
             BX.ajax.runComponentAction('otus:cars.grid', 'addCar', {
                 mode: 'class',
@@ -50,19 +54,24 @@ $contactId = (int)$_REQUEST['contact_id'];
                     brand: BX('BRAND').value,
                     model: BX('MODEL').value,
                     regNumber: BX('REG_NUMBER').value,
-                    year: BX('YEAR').value,
+                    year: yearVal ? parseInt(yearVal) : 0,
                     color: BX('COLOR').value,
-                    mileage: BX('MILEAGE').value
+                    mileage: mileageVal ? parseInt(mileageVal) : 0
                 }
             }).then(function (response) {
-                if (response.data.success) {
-                    BX.SidePanel.Instance.close(); // Успех - закрываем окно
-                } else if (response.data.error) {
+                if (response.data && response.data.error) {
                     alert(response.data.error);
                     BX.removeClass(btn, 'ui-btn-wait');
+                } else {
+                    BX.SidePanel.Instance.close();
                 }
             }).catch(function(response) {
-                alert('Произошла ошибка.');
+                // Если ошибка системная, выводим её реальный текст для дебага
+                var msg = 'Системная ошибка сервера.';
+                if (response.errors && response.errors.length > 0) {
+                    msg = response.errors[0].message;
+                }
+                alert(msg);
                 BX.removeClass(btn, 'ui-btn-wait');
             });
         }

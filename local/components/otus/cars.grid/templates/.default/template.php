@@ -87,10 +87,10 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
             cacheable: false,
             events: {
                 onClose: function() {
-                    // Перезагружаем грид после закрытия слайдера
+                    // Перезагружаем грид с явной передачей CONTACT_ID
                     var gridObject = BX.Main.gridManager.getInstanceById('cars_grid_' + contactId);
                     if (gridObject) {
-                        gridObject.reload();
+                        gridObject.reload('/local/components/otus/cars.grid/lazyload.php?CONTACT_ID=' + contactId);
                     }
                 }
             }
