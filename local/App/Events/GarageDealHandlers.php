@@ -24,6 +24,7 @@ class GarageDealHandlers
                 [],
                 [
                     '=' . $carFieldCode => $carId,
+                    '=CATEGORY_ID' => 1,
                     '!=STAGE_SEMANTIC_ID' => ['S', 'F'], // S - успех, F - провал
                     'CHECK_PERMISSIONS' => 'N'
                 ],
