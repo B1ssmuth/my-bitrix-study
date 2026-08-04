@@ -34,6 +34,10 @@ class CatalogSyncAgent
             $response = $httpClient->get($url);
             $quantity = (int)trim($response);
 
+            // --- ЧИТ-КОД ДЛЯ ТЕСТА (потом удалим) ---
+            $quantity = 0; 
+            // ----------------------------------------
+
             if ($quantity === 0) {
                 // По ТЗ: если 0 - закупаем 10 единиц
                 $quantity = 10;

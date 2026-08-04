@@ -10,6 +10,7 @@ $contactId = (int)$_REQUEST['contact_id'];
 <html lang="ru">
 <head>
     <?php $APPLICATION->ShowHead(); ?>
+    <script>BX.message({'bitrix_sessid': '<?=bitrix_sessid()?>'});</script>
     <style>body { background: #fff !important; padding: 25px; font-family: Helvetica, Arial, sans-serif; }</style>
 </head>
 <body>
