@@ -12,7 +12,7 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
         'ROWS' => $arResult['ROWS'],
         'SHOW_ROW_CHECKBOXES' => false,
         'NAV_OBJECT' => false,
-        'AJAX_MODE' => 'Y',
+        'AJAX_MODE' => 'N',
         'AJAX_ID' => \CAjax::getComponentID('bitrix:main.ui.grid', '.default', ''),
         'PAGE_SIZES' => [
             ['NAME' => "5", 'VALUE' => '5'],
