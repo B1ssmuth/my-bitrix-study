@@ -1,24 +1,43 @@
 <?php
+
 namespace Otus\CrmTab;
+
+use Bitrix\Main\Event;
+use Bitrix\Main\EventResult;
+use Bitrix\Main\Localization\Loc;
+
+Loc::loadMessages(__FILE__);
 
 class Events
 {
-    public static function addVisitLogTab(\Bitrix\Main\Event $event)
+    /**
+     * Обработчик добавления кастомной вкладки в карточку CRM
+     */
+    public static function onEntityDetailsTabsInitialized(Event $event)
     {
-        $tabs = $event->getParameter('tabs');
         $entityID = $event->getParameter('entityID');
+        $entityTypeID = $event->getParameter('entityTypeID');
+        $tabs = $event->getParameter('tabs');
 
-        $tabs[] = [
-            'id' => 'tab_visit_log',
-            'name' => 'Журнал посещений',
-            'loader' => [
-                'serviceUrl' => '/local/components/otus/visit.grid/lazyload.php',
-                'componentData' => [
-                    'ENTITY_ID' => $entityID
+        // По ТЗ: вкладка должна быть у контакта-физлица[cite: 2]
+        if ($entityTypeID === \CCrmOwnerType::Contact) {
+            $tabs[] = [
+                'id' => 'garage_tab',
+                // Используем языковую фразу, если нет - fallback на "Гараж"[cite: 2]
+                'name' => Loc::getMessage('OTUS_CRMTAB_GARAGE_NAME') ?: 'Гараж',
+                'loader' => [
+                    // Ссылка на lazyload файл нашего будущего компонента
+                    'serviceUrl' => '/local/components/otus/cars.grid/lazyload.php?&site=' . SITE_ID . '&' . bitrix_sessid_get(),
+                    'componentData' => [
+                        'template' => '',
+                        'params' => [
+                            'CONTACT_ID' => $entityID
+                        ]
+                    ]
                 ]
-            ]
-        ];
-
-        return new \Bitrix\Main\EventResult(\Bitrix\Main\EventResult::SUCCESS, ['tabs' => $tabs], 'crm');
+            ];
+            
+            return new EventResult(EventResult::SUCCESS, ['tabs' => $tabs], 'otus.crmtab');
+        }
     }
 }
