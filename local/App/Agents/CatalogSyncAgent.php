@@ -33,30 +33,29 @@ class CatalogSyncAgent
             $response = $httpClient->get($url);
             $quantity = (int)trim($response);
 
-            // По ТЗ: закупаем только если реальный остаток 0[cite: 2]
+            // --- ВРЕМЕННЫЙ ЧИТ-КОД ДЛЯ ТЕСТА ---
+            $quantity = 0; 
+            // -----------------------------------
+
+            // По ТЗ: закупаем только если реальный остаток 0
             if ($quantity === 0) {
-                $quantity = 10; // Устанавливаем в 10 единиц[cite: 2]
+                $quantity = 10; // Устанавливаем в 10 единиц
                 
                 self::notifyPurchaser($product['NAME']);
                 self::createAutoPurchaseRequest($product['NAME'], 10);
             }
 
-            /// Формируем массив полей: количество + флаг учета
             $productFields = [
                 'QUANTITY' => $quantity,
-                'QUANTITY_TRACE' => 'Y', // Принудительно включаем учет остатков!
+                'QUANTITY_TRACE' => 'Y', // Принудительно включаем учет остатков
             ];
 
-            // Проверяем, есть ли уже товар в складской таблице
-            $productExist = \Bitrix\Catalog\Model\Product::getCacheItem($productId, true);
-
-            if (!empty($productExist)) {
-                // Если есть - обновляем
-                \Bitrix\Catalog\Model\Product::update($productId, $productFields);
+            // CCatalogProduct::GetByID вернет массив, если товар есть в складе, и false, если нет
+            if (\CCatalogProduct::GetByID($productId)) {
+                \CCatalogProduct::Update($productId, $productFields);
             } else {
-                // Если нет - создаем запись в таблице каталога
                 $productFields['ID'] = $productId;
-                \Bitrix\Catalog\Model\Product::add($productFields);
+                \CCatalogProduct::Add($productFields);
             }
         }
 
