@@ -41,8 +41,16 @@ class CatalogSyncAgent
                 self::createAutoPurchaseRequest($product['NAME'], 10);
             }
 
-            // Надежный метод обновления остатка
-            \CCatalogProduct::Update($productId, ['QUANTITY' => $quantity]);
+            // Пытаемся обновить остаток
+            $isUpdated = \CCatalogProduct::Update($productId, ['QUANTITY' => $quantity]);
+            
+            // Если товара еще нет в таблице остатков каталога — создаем запись
+            if (!$isUpdated) {
+                \CCatalogProduct::Add([
+                    'ID' => $productId,
+                    'QUANTITY' => $quantity
+                ]);
+            }
         }
 
         // Возвращаем строку вызова для того, чтобы агент запустился снова на следующий день
