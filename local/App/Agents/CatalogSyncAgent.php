@@ -41,15 +41,22 @@ class CatalogSyncAgent
                 self::createAutoPurchaseRequest($product['NAME'], 10);
             }
 
-            // Пытаемся обновить остаток
-            $isUpdated = \CCatalogProduct::Update($productId, ['QUANTITY' => $quantity]);
-            
-            // Если товара еще нет в таблице остатков каталога — создаем запись
-            if (!$isUpdated) {
-                \CCatalogProduct::Add([
-                    'ID' => $productId,
-                    'QUANTITY' => $quantity
-                ]);
+            /// Формируем массив полей: количество + флаг учета
+            $productFields = [
+                'QUANTITY' => $quantity,
+                'QUANTITY_TRACE' => 'Y', // Принудительно включаем учет остатков!
+            ];
+
+            // Проверяем, есть ли уже товар в складской таблице
+            $productExist = \Bitrix\Catalog\Model\Product::getCacheItem($productId, true);
+
+            if (!empty($productExist)) {
+                // Если есть - обновляем
+                \Bitrix\Catalog\Model\Product::update($productId, $productFields);
+            } else {
+                // Если нет - создаем запись в таблице каталога
+                $productFields['ID'] = $productId;
+                \Bitrix\Catalog\Model\Product::add($productFields);
             }
         }
 
