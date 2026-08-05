@@ -114,6 +114,15 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
         $contactId = (int)($this->arParams['CONTACT_ID'] ?? 0);
         $this->arResult['GRID_ID'] = 'cars_grid_' . $contactId;
 
+        // --- ДОБАВЛЕНО: Получаем имя клиента ---
+        $clientName = 'Неизвестный клиент';
+        if ($contactId > 0) {
+            $rsContact = \CCrmContact::GetByID($contactId);
+            if ($rsContact) {
+                $clientName = trim($rsContact['NAME'] . ' ' . $rsContact['LAST_NAME']);
+            }
+        }
+
         $gridOptions = new \Bitrix\Main\Grid\Options($this->arResult['GRID_ID']);
         $sort = $gridOptions->GetSorting(['sort' => ['ID' => 'DESC'], 'vars' => ['by' => 'by', 'order' => 'order']]);
 
@@ -139,7 +148,8 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
             ])->fetchAll();
 
             foreach ($cars as $car) {
-                $carTitle = htmlspecialcharsbx($car['BRAND'] . ' ' . $car['MODEL'] . ' - ' . $car['REG_NUMBER']);
+                // --- ИСПРАВЛЕНО: Формируем заголовок с именем клиента ---
+                $carTitle = htmlspecialcharsbx($car['BRAND'] . ' ' . $car['MODEL'] . ' - ' . $car['REG_NUMBER'] . ' (' . $clientName . ')');
                 
                 $this->arResult['ROWS'][] = [
                     'data' => $car,
@@ -150,7 +160,6 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
                         ],
                         [
                             'text' => 'Создать заказ-наряд',
-                            // Передаем название машины для формирования заголовка сделки
                             'onclick' => 'createDealForCar(' . $car['ID'] . ', ' . $contactId . ', "' . $carTitle . '")' 
                         ],
                         [

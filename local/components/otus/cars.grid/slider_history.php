@@ -11,8 +11,6 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.ph
 $carId = (int)($_REQUEST['car_id'] ?? 0);
 $carTitle = $_REQUEST['car_title'] ?? 'История обслуживания';
 
-// Имя клиента по ТЗ должно быть в заголовке окна. 
-// Мы передадим его чуть позже, когда доработаем js-вызов, пока выводим то, что есть.
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -26,12 +24,12 @@ $carTitle = $_REQUEST['car_title'] ?? 'История обслуживания';
 </head>
 <body>
     <div class="history-header">
-        <?= htmlspecialcharsbx($carTitle) ?>
+        <?= $carTitle // Уже обработано через htmlspecialcharsbx в классе ?>
     </div>
 
     <div class="history-grid-container" style="background: #fff; padding: 15px; border-radius: 4px;">
         <?php
-        // Колонки для истории сделок строго по ТЗ[cite: 2]
+        // Колонки для истории сделок строго по ТЗ
         $columns = [
             ['id' => 'TITLE', 'name' => 'Название', 'default' => true],
             ['id' => 'DATE_CREATE', 'name' => 'Дата создания', 'default' => true],
@@ -57,8 +55,8 @@ $carTitle = $_REQUEST['car_title'] ?? 'История обслуживания';
                 ['ID', 'TITLE', 'DATE_CREATE', 'STAGE_ID', 'ASSIGNED_BY_ID', 'ASSIGNED_BY_NAME', 'ASSIGNED_BY_LAST_NAME', 'OPPORTUNITY', 'CURRENCY_ID']
             );
 
-            // Получаем человекопонятные названия стадий
-            $stages = \CCrmStatus::GetStatusList('DEAL_STAGE');
+            // ИСПРАВЛЕНИЕ: Получаем человекопонятные названия стадий для Воронки 1
+            $stages = \CCrmStatus::GetStatusList('DEAL_STAGE_1');
 
             while ($deal = $dealRes->Fetch()) {
                 
@@ -67,7 +65,7 @@ $carTitle = $_REQUEST['car_title'] ?? 'История обслуживания';
                             htmlspecialcharsbx($deal['ASSIGNED_BY_NAME'] . ' ' . $deal['ASSIGNED_BY_LAST_NAME']) . 
                             '</a>';
 
-                // Получаем товары сделки (список запчастей)[cite: 2]
+                // Получаем товары сделки (список запчастей)
                 $products = \CCrmDeal::LoadProductRows($deal['ID']);
                 $partsList = [];
                 foreach ($products as $product) {
