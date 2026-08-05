@@ -44,7 +44,6 @@ $contactId = (int)$_REQUEST['contact_id'];
             var btn = BX('saveBtn');
             BX.addClass(btn, 'ui-btn-wait');
 
-            // Защита от пустых строк в числовых полях
             var yearVal = BX('YEAR').value;
             var mileageVal = BX('MILEAGE').value;
 
@@ -64,12 +63,12 @@ $contactId = (int)$_REQUEST['contact_id'];
                     alert(response.data.error);
                     BX.removeClass(btn, 'ui-btn-wait');
                 } else {
-                    BX.SidePanel.Instance.close();
+                    // Используем top.BX для закрытия изнутри iframe
+                    top.BX.SidePanel.Instance.close();
                 }
             }).catch(function(response) {
-                // Сервер отдал невалидный JSON, но мы знаем, что D7 отработал успешно.
-                // Игнорируем ошибку парсинга и просто закрываем окно.
-                BX.SidePanel.Instance.close();
+                // Аналогично в блоке catch
+                top.BX.SidePanel.Instance.close();
             });
         }
     </script>

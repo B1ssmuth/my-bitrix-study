@@ -104,11 +104,11 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
                 data: { carId: carId }
             }).then(function (response) {
                 var gridObject = BX.Main.gridManager.getInstanceById('cars_grid_' + contactId);
-                if (gridObject) gridObject.reload();
+                // Явно указываем URL нашего файла подгрузки
+                if (gridObject) gridObject.reload('/local/components/otus/cars.grid/lazyload.php?CONTACT_ID=' + contactId);
             }).catch(function(response) {
-                // Тот же хак: принудительно обновляем грид
                 var gridObject = BX.Main.gridManager.getInstanceById('cars_grid_' + contactId);
-                if (gridObject) gridObject.reload();
+                if (gridObject) gridObject.reload('/local/components/otus/cars.grid/lazyload.php?CONTACT_ID=' + contactId);
             });
         }
     }
