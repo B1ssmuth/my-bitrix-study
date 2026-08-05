@@ -33,13 +33,9 @@ class CatalogSyncAgent
             $response = $httpClient->get($url);
             $quantity = (int)trim($response);
 
-            // --- ВРЕМЕННЫЙ ЧИТ-КОД ДЛЯ ТЕСТА ---
-            $quantity = 0; 
-            // -----------------------------------
-
             // По ТЗ: закупаем только если реальный остаток 0
             if ($quantity === 0) {
-                $quantity = 10; // Устанавливаем в 10 единиц
+                $quantity = 10;
                 
                 self::notifyPurchaser($product['NAME']);
                 self::createAutoPurchaseRequest($product['NAME'], 10);
@@ -47,10 +43,10 @@ class CatalogSyncAgent
 
             $productFields = [
                 'QUANTITY' => $quantity,
-                'QUANTITY_TRACE' => 'Y', // Принудительно включаем учет остатков
+                'QUANTITY_TRACE' => 'Y',
+                'TYPE' => 1 // Тот самый спасительный параметр!
             ];
 
-            // CCatalogProduct::GetByID вернет массив, если товар есть в складе, и false, если нет
             if (\CCatalogProduct::GetByID($productId)) {
                 \CCatalogProduct::Update($productId, $productFields);
             } else {
