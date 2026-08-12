@@ -63,17 +63,19 @@ class CatalogSyncAgent
      */
     private static function notifyPurchaser(string $productName): void
     {
-        $purchaserUserId = 5; // ID Закупщика
+        $purchasersIds = [5, 8, 14]; // ID Закупщиков
 
         $message = "Запчасть «{$productName}» кончилась. Автоматически создана заявка и закуплено 10 штук.";
 
-        \CIMNotify::Add([
-            'TO_USER_ID' => $purchaserUserId,
-            'FROM_USER_ID' => 0,
-            'NOTIFY_TYPE' => IM_NOTIFY_SYSTEM,
-            'NOTIFY_MODULE' => 'crm',
-            'NOTIFY_MESSAGE' => $message
-        ]);
+        foreach ($purchasersIds as $userId) {
+            \CIMNotify::Add([
+                'TO_USER_ID' => $userId,
+                'FROM_USER_ID' => 0,
+                'NOTIFY_TYPE' => IM_NOTIFY_SYSTEM,
+                'NOTIFY_MODULE' => 'crm',
+                'NOTIFY_MESSAGE' => $message
+            ]);
+        }
     }
 
     /**
