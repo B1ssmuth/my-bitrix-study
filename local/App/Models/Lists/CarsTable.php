@@ -27,7 +27,7 @@ class CarsTable extends DataManager
     }
 
     /**
-     * Возвращает карту полей таблицы.
+     * Возвращает карту полей таблицы
      *
      * @return array
      */

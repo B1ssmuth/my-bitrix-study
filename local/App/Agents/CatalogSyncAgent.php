@@ -9,7 +9,7 @@ use Bitrix\Catalog\Model\Product;
 class CatalogSyncAgent
 {
     /**
-     * Агент ежедневной синхронизации остатков запчастей.
+     * Агент ежедневной синхронизации остатков запчастей
      * 
      * @return string
      */
@@ -21,7 +21,6 @@ class CatalogSyncAgent
 
         $httpClient = new HttpClient();
         
-        // В ТЗ указан конкретный URL для получения случайного числа
         $url = 'https://www.random.org/integers/?num=1&min=0&max=10&col=1&base=10&format=plain&rnd=new';
 
         // Получаем все товары из стандартного каталога CRM
@@ -33,7 +32,7 @@ class CatalogSyncAgent
             $response = $httpClient->get($url);
             $quantity = (int)trim($response);
 
-            // По ТЗ: закупаем только если реальный остаток 0
+            // Закупаем только если реальный остаток 0
             if ($quantity === 0) {
                 $quantity = 10;
                 
@@ -44,7 +43,7 @@ class CatalogSyncAgent
             $productFields = [
                 'QUANTITY' => $quantity,
                 'QUANTITY_TRACE' => 'Y',
-                'TYPE' => 1 // Тот самый спасительный параметр!
+                'TYPE' => 1
             ];
 
             if (\CCatalogProduct::GetByID($productId)) {
@@ -64,9 +63,7 @@ class CatalogSyncAgent
      */
     private static function notifyPurchaser(string $productName): void
     {
-        // Временно укажем ID администратора (твой). 
-        // Позже при настройке прав заменим на поиск пользователей с ролью "Закупщик"[cite: 2].
-        $purchaserUserId = 1; 
+        $purchaserUserId = 5; // ID Закупщика
 
         $message = "Запчасть «{$productName}» кончилась. Автоматически создана заявка и закуплено 10 штук.";
 
@@ -80,7 +77,7 @@ class CatalogSyncAgent
     }
 
     /**
-     * Создает запись о закупке в Универсальном списке.
+     * Создает запись о закупке в Универсальном списке
      */
     private static function createAutoPurchaseRequest(string $productName, int $quantity): void
     {

@@ -3,7 +3,7 @@
 define('NO_KEEP_STATISTIC', 'Y');
 define('NO_AGENT_STATISTIC', 'Y');
 
-// Подключаем ядро без визуального шаблона (без левого меню и шапки)
+// Подключаем ядро без визуального шаблона
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
 
 \Bitrix\Main\UI\Extension::load(["ui.buttons", "ui.grid", "main.ui.grid"]);
@@ -29,7 +29,7 @@ $carTitle = $_REQUEST['car_title'] ?? 'История обслуживания';
 
     <div class="history-grid-container" style="background: #fff; padding: 15px; border-radius: 4px;">
         <?php
-        // Колонки для истории сделок строго по ТЗ
+        // Колонки для истории сделок
         $columns = [
             ['id' => 'TITLE', 'name' => 'Название', 'default' => true],
             ['id' => 'DATE_CREATE', 'name' => 'Дата создания', 'default' => true],
@@ -55,7 +55,7 @@ $carTitle = $_REQUEST['car_title'] ?? 'История обслуживания';
                 ['ID', 'TITLE', 'DATE_CREATE', 'STAGE_ID', 'ASSIGNED_BY_ID', 'ASSIGNED_BY_NAME', 'ASSIGNED_BY_LAST_NAME', 'OPPORTUNITY', 'CURRENCY_ID']
             );
 
-            // ИСПРАВЛЕНИЕ: Получаем человекопонятные названия стадий для Воронки 1
+            // Получаем человекопонятные названия стадий для Воронки 1
             $stages = \CCrmStatus::GetStatusList('DEAL_STAGE_1');
 
             while ($deal = $dealRes->Fetch()) {

@@ -33,8 +33,8 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
     {
         Loader::includeModule('crm');
         
-        $categoryId = 1; // Твой ID воронки
-        $carFieldCode = 'UF_CRM_1785836988'; // Твой код поля
+        $categoryId = 1; // ID воронки
+        $carFieldCode = 'UF_CRM_1785836988'; // Код поля
 
         // 1. Проверяем наличие открытых сделок до попытки создания для красивого UX
         $dbRes = \CCrmDeal::GetListEx(
@@ -114,7 +114,6 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
         $contactId = (int)($this->arParams['CONTACT_ID'] ?? 0);
         $this->arResult['GRID_ID'] = 'cars_grid_' . $contactId;
 
-        // --- ДОБАВЛЕНО: Получаем имя клиента ---
         $clientName = 'Неизвестный клиент';
         if ($contactId > 0) {
             $rsContact = \CCrmContact::GetByID($contactId);
@@ -148,7 +147,6 @@ class CarsGridComponent extends \CBitrixComponent implements Controllerable
             ])->fetchAll();
 
             foreach ($cars as $car) {
-                // --- ИСПРАВЛЕНО: Формируем заголовок с именем клиента ---
                 $carTitle = htmlspecialcharsbx($car['BRAND'] . ' ' . $car['MODEL'] . ' - ' . $car['REG_NUMBER'] . ' (' . $clientName . ')');
                 
                 $this->arResult['ROWS'][] = [

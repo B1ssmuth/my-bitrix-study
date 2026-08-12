@@ -68,7 +68,6 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) die();
                     { cacheable: false }
                 );
             } else if (response.data.error) {
-                // Если сработал наш обработчик (например, уже есть открытая сделка), выводим ошибку
                 alert(response.data.error);
             }
         }).catch(function(response) {
